@@ -34,4 +34,14 @@ export const api = {
   getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
   getPrescriptions: () => isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),
   getBilling: () => isDemoMode ? Promise.resolve(demoData.billing) : request('/billing'),
+  getDashboardData: async () => {
+    const [patients, appointments, prescriptions, billing] = await Promise.all([
+      isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),
+      isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
+      isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),
+      isDemoMode ? Promise.resolve(demoData.billing) : request('/billing'),
+    ])
+
+    return { patients, appointments, prescriptions, billing }
+  },
 }
