@@ -1,18 +1,30 @@
 # Care Continuum Frontend
 
-React interface for the Telemedicine Consultation and EHR System.
+The React/Vite interface for the Telemedicine Consultation and EHR System.
 
-## Run locally
+The complete architecture, API contract, setup order, branch workflow, known limitations, troubleshooting notes and viva explanation are maintained in the [project README](../README.md).
+
+## Start locally
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Vite proxies `/api` requests to `http://localhost:3000` during development. To use another API host, copy `.env.example` to `.env` and set `VITE_API_URL`.
+Copy `.env.example` to `.env.local` and select a data mode:
 
-## Commands
+```env
+VITE_API_URL=/api
+VITE_USE_DEMO_DATA=true
+```
 
-- `pnpm dev` starts the development server.
-- `pnpm build` creates a production build.
-- `pnpm lint` runs the source-code checks.
+Use `true` for standalone UI preview or `false` to call the Express/Oracle API. Restart Vite after changing environment variables.
+
+## Verify before committing
+
+```bash
+pnpm lint
+pnpm run build
+```
+
+Never commit `.env.local`, API/database credentials, `node_modules` or `dist`.

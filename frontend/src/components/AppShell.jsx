@@ -80,8 +80,8 @@ export function AppShell() {
             <div className="privacy-note">
               <span className="privacy-dot" />
               <span>
-                <strong>Protected workspace</strong>
-                <small>Academic demonstration</small>
+                <strong>Demo workspace</strong>
+                <small>Academic prototype</small>
               </span>
             </div>
           )}
