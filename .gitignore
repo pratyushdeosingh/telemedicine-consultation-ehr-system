@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs and editor files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Oracle/local runtime files
+*.dbf
+*.ora
+
