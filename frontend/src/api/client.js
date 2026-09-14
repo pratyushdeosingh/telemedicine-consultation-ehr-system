@@ -1,4 +1,7 @@
+import { demoData } from './demoData.js'
+
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+export const isDemoMode = import.meta.env.VITE_USE_DEMO_DATA === 'true'
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -26,9 +29,9 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  testConnection: () => request('/test-db'),
-  getPatients: () => request('/patients'),
-  getAppointments: () => request('/appointments'),
-  getPrescriptions: () => request('/prescriptions'),
-  getBilling: () => request('/billing'),
+  testConnection: () => isDemoMode ? Promise.resolve({ success: true }) : request('/test-db'),
+  getPatients: () => isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),
+  getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
+  getPrescriptions: () => isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),
+  getBilling: () => isDemoMode ? Promise.resolve(demoData.billing) : request('/billing'),
 }
