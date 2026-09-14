@@ -360,6 +360,37 @@ a { color: inherit; text-decoration: none; }
 .secondary-button { display: inline-flex; min-height: 2.35rem; align-items: center; gap: 0.42rem; margin-left: auto; padding: 0 0.8rem; border: 1px solid rgba(141, 59, 59, 0.18); border-radius: 0.75rem; color: #743b3b; background: #ffffff; cursor: pointer; font-size: 0.69rem; font-weight: 680; transition: transform 130ms var(--ease-out), background-color 160ms ease; }
 .secondary-button:active { transform: scale(0.97); }
 
+.prescription-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; padding: 1rem; }
+.prescription-card { overflow: hidden; border: 1px solid var(--line); border-radius: 1.15rem; background: rgba(255, 255, 255, 0.65); transition: border-color 180ms ease, transform 180ms var(--ease-out), box-shadow 180ms ease; }
+.prescription-card > header { display: flex; min-height: 4.5rem; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem; border-bottom: 1px solid var(--line); }
+.rx-number { padding: 0.42rem 0.58rem; border-radius: 0.55rem; color: #28644c; background: var(--mint-soft); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.66rem; font-weight: 720; }
+.medicine-list { padding: 0 0.8rem; }
+.medicine-row { display: grid; grid-template-columns: auto minmax(8rem, 1.2fr) minmax(6rem, 0.8fr) auto; min-height: 4.6rem; align-items: center; gap: 0.65rem; border-bottom: 1px solid var(--line); }
+.medicine-row:last-child { border-bottom: 0; }
+.medicine-icon { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 0.65rem; color: #39785f; background: #ecf6f1; }
+.medicine-row span > strong, .medicine-row span > small { display: block; }
+.medicine-row span > strong { font-size: 0.72rem; }
+.medicine-row span > small { display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; color: var(--ink-500); font-size: 0.61rem; }
+.medicine-row > strong { font-size: 0.7rem; }
+.prescription-card > footer { display: flex; min-height: 3.25rem; align-items: center; justify-content: space-between; padding: 0 0.8rem; color: var(--ink-500); background: rgba(237, 244, 240, 0.62); font-size: 0.65rem; }
+.prescription-card > footer strong { color: var(--ink-950); font-size: 0.78rem; }
+
+.invoice-list { padding: 0.35rem 1.1rem 0.65rem; }
+.invoice-row { display: grid; grid-template-columns: auto minmax(11rem, 1.3fr) minmax(8rem, 0.9fr) minmax(7rem, 0.75fr) minmax(7rem, 0.75fr) auto; min-height: 5.2rem; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--line); }
+.invoice-row:last-child { border-bottom: 0; }
+.invoice-icon { display: grid; width: 2.65rem; height: 2.65rem; place-items: center; border-radius: 0.85rem; color: #39785f; background: #e5f4ed; }
+.invoice-date strong, .invoice-date small, .invoice-amount strong, .invoice-amount small, .invoice-calculated strong, .invoice-calculated small { display: block; }
+.invoice-date strong, .invoice-amount strong, .invoice-calculated strong { font-size: 0.71rem; }
+.invoice-date small, .invoice-amount small, .invoice-calculated small { margin-top: 0.18rem; color: var(--ink-500); font-size: 0.6rem; }
+.invoice-calculated strong { color: #35745b; }
+.invoice-state { display: grid; justify-items: end; gap: 0.32rem; }
+.invoice-state > small { color: #9d6337; font-size: 0.58rem; font-weight: 650; }
+.invoice-state > small[data-negative='true'] { color: #a45454; }
+
+@media (hover: hover) and (pointer: fine) {
+  .prescription-card:hover { border-color: rgba(57, 120, 95, 0.18); transform: translateY(-2px); box-shadow: 0 1rem 2rem rgba(31, 58, 47, 0.07); }
+}
+
 .mobile-nav { display: none; }
 
 @media (hover: hover) and (pointer: fine) {
@@ -397,6 +428,9 @@ a { color: inherit; text-decoration: none; }
   .record-detail { display: none; }
   .appointment-card { grid-template-columns: 3.15rem 1fr auto; }
   .appointment-clinician { grid-column: 2 / -1; padding-bottom: 0.9rem; }
+  .prescription-grid { grid-template-columns: 1fr; }
+  .invoice-row { grid-template-columns: auto 1fr auto; padding: 0.75rem 0; }
+  .invoice-date, .invoice-calculated { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -412,6 +446,10 @@ a { color: inherit; text-decoration: none; }
   .appointment-card { grid-template-columns: 3.15rem 1fr; padding: 0.7rem 0; }
   .appointment-status { grid-column: 2; justify-items: start; }
   .appointment-clinician { grid-column: 2; padding-bottom: 0; }
+  .medicine-row { grid-template-columns: auto 1fr auto; padding: 0.55rem 0; }
+  .medicine-row > span:nth-child(3) { grid-column: 2; }
+  .invoice-row { grid-template-columns: auto 1fr; }
+  .invoice-state { grid-column: 2; justify-items: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
