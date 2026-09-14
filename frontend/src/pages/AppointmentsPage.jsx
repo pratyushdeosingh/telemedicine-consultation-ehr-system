@@ -1,5 +1,5 @@
-import { PagePlaceholder } from '../components/PagePlaceholder.jsx'
+import { SectionPlaceholder } from '../components/SectionPlaceholder.jsx'
 
 export function AppointmentsPage() {
-  return <PagePlaceholder eyebrow="Care schedule" title="Appointments" description="In-person and virtual consultations." />
+  return <SectionPlaceholder eyebrow="Care schedule" title="Appointments" description="In-person and virtual consultations." />
 }

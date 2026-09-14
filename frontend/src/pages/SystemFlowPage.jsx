@@ -1,5 +1,5 @@
-import { PagePlaceholder } from '../components/PagePlaceholder.jsx'
+import { SectionPlaceholder } from '../components/SectionPlaceholder.jsx'
 
 export function SystemFlowPage() {
-  return <PagePlaceholder eyebrow="Architecture" title="System flow" description="React to Express to Oracle, and back as JSON." />
+  return <SectionPlaceholder eyebrow="Architecture" title="System flow" description="React to Express to Oracle, and back as JSON." />
 }

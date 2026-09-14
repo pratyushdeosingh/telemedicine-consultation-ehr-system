@@ -1,5 +1,5 @@
-import { PagePlaceholder } from '../components/PagePlaceholder.jsx'
+import { SectionPlaceholder } from '../components/SectionPlaceholder.jsx'
 
 export function BillingPage() {
-  return <PagePlaceholder eyebrow="Revenue cycle" title="Billing" description="Invoice totals and payment state." />
+  return <SectionPlaceholder eyebrow="Revenue cycle" title="Billing" description="Invoice totals and payment state." />
 }

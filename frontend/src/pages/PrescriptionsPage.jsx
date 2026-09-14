@@ -1,5 +1,5 @@
-import { PagePlaceholder } from '../components/PagePlaceholder.jsx'
+import { SectionPlaceholder } from '../components/SectionPlaceholder.jsx'
 
 export function PrescriptionsPage() {
-  return <PagePlaceholder eyebrow="Medication" title="Prescriptions" description="Medicine, dosage, duration, and cost." />
+  return <SectionPlaceholder eyebrow="Medication" title="Prescriptions" description="Medicine, dosage, duration, and cost." />
 }
