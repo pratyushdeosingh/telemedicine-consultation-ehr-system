@@ -28,12 +28,25 @@ async function request(path, options = {}) {
   return payload
 }
 
+function sendJson(path, method, body) {
+  return request(path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
 export const api = {
   testConnection: () => isDemoMode ? Promise.resolve({ success: true }) : request('/test-db'),
   getPatients: () => isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),
   getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
   getPrescriptions: () => isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),
   getBilling: () => isDemoMode ? Promise.resolve(demoData.billing) : request('/billing'),
+  getTestResults: () => isDemoMode ? Promise.resolve([]) : request('/test-results'),
+  createPatient: (patient) => sendJson('/patients', 'POST', patient),
+  createAppointment: (appointment) => sendJson('/appointments', 'POST', appointment),
+  createPrescription: (prescription) => sendJson('/prescriptions', 'POST', prescription),
+  updateAppointmentStatus: (appointmentId, status) => sendJson(`/appointments/${encodeURIComponent(appointmentId)}/status`, 'PUT', { status }),
   getDashboardData: async () => {
     const [patients, appointments, prescriptions, billing] = await Promise.all([
       isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),

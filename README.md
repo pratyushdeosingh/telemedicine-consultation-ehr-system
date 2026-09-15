@@ -81,7 +81,7 @@ It does **not** mean that authentication, authorisation, encryption, audit loggi
 
 Only synthetic demonstration data should be used until proper security and privacy controls are added.
 
-## 5. API contract currently expected by the frontend
+## 5. Integrated API contract
 
 | Method and endpoint | Expected information |
 | --- | --- |
@@ -90,8 +90,13 @@ Only synthetic demonstration data should be used until proper security and priva
 | `GET /api/appointments` | Appointment, patient, doctor, department, date/time, status and consultation mode |
 | `GET /api/prescriptions` | Prescription medicines, dosage, frequency, duration, quantity and calculated cost |
 | `GET /api/billing` | Invoice/payment information and calculated medical cost |
+| `GET /api/test-results` | Laboratory results and report metadata |
+| `POST /api/patients` | Register a new patient |
+| `POST /api/appointments` | Book a new appointment |
+| `POST /api/prescriptions` | Create a prescription with medicine items |
+| `PUT /api/appointments/:appointment_id/status` | Change an appointment status |
 
-Before integration, the backend and frontend developers should compare one real JSON response from each endpoint. Field names and response shapes must match what `frontend/src/api/client.js` and the pages consume.
+The five dashboard GET responses have been compared with the fields consumed by the React pages and match. The frontend API client also exposes the write operations and lab-result endpoint for the next UI workflow phase. A final live check still requires local Oracle credentials.
 
 ## 6. Important frontend calculations
 
@@ -204,18 +209,26 @@ pnpm preview
 8. Check every page and compare at least one displayed record with Oracle.
 9. Demonstrate any known billing variance honestly and explain its cause/resolution.
 
-## 11. What still needs to be completed
+Local backend configuration:
 
-The present frontend is a strong read-only dashboard, but the complete DA still requires integration and evidence.
+```bash
+cd backend
+npm ci
+copy .env.example .env
+# Edit .env with the local Oracle credentials, then:
+npm start
+```
 
-- Push the actual Express implementation to the `backend` branch; at the latest frontend checkpoint that branch contained only its placeholder README.
-- Test all five endpoints against the current Oracle schema and agree on exact JSON field names.
-- Resolve the difference between stored billing totals and totals calculated from medicine/lab records.
-- Decide whether the assessment requires create/update actions. The current API contract is GET-only, so no appointment booking or record editing is available yet.
-- Add endpoints/pages for medical logs, allergies, doctors, laboratories/results and telemedicine session links if those items are required by the DA rubric/schema.
-- Add validation and friendly server error responses.
+## 11. Integration status and remaining live checks
+
+The Express backend and React frontend are now integrated at the source and API-contract level. The backend starts without secrets, reports incomplete database configuration clearly, validates write requests, and uses explicit commit/rollback handling.
+
+- Configure a local `.env` and test every endpoint against the actual Oracle instance.
+- Confirm that the teammate's Oracle-side billing correction and APT-08 prescription item exist in the shared database script or a committed migration; the current remote `database` branch predates those two corrections.
+- Add UI forms for the available POST/PUT actions if interactive record creation is required in the final demonstration.
+- Add pages for medical logs, allergies, doctors, laboratories/results and telemedicine session links if those items are required by the DA rubric/schema.
 - Capture database output, endpoint JSON and dashboard screenshots as submission evidence.
-- Merge through pull requests and perform one clean end-to-end rehearsal.
+- Perform one clean end-to-end rehearsal with Oracle running.
 
 Authentication and production security are out of the current implementation. If the application is extended beyond an academic demo, they become mandatory rather than optional polish.
 
