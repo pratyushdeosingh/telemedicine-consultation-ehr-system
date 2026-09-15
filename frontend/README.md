@@ -20,6 +20,8 @@ VITE_USE_DEMO_DATA=true
 
 Use `true` for standalone UI preview or `false` to call the Express/Oracle API. Restart Vite after changing environment variables.
 
+In live mode, use **Register patient** on Patients, **Book appointment** or the status controls on Appointments, and **Create prescription** on Prescriptions to write records to Oracle. Write controls intentionally reject requests in preview mode.
+
 ## Verify before committing
 
 ```bash

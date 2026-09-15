@@ -29,6 +29,10 @@ async function request(path, options = {}) {
 }
 
 function sendJson(path, method, body) {
+  if (isDemoMode) {
+    return Promise.reject(new Error('Writing is disabled while preview data is active. Switch to the live Oracle API first.'))
+  }
+
   return request(path, {
     method,
     headers: { 'Content-Type': 'application/json' },
@@ -42,6 +46,9 @@ export const api = {
   getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
   getPrescriptions: () => isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),
   getBilling: () => isDemoMode ? Promise.resolve(demoData.billing) : request('/billing'),
+  getDoctors: () => isDemoMode ? Promise.resolve([]) : request('/doctors'),
+  getMedicines: () => isDemoMode ? Promise.resolve([]) : request('/medicines'),
+  getPharmacies: () => isDemoMode ? Promise.resolve([]) : request('/pharmacies'),
   getTestResults: () => isDemoMode ? Promise.resolve([]) : request('/test-results'),
   createPatient: (patient) => sendJson('/patients', 'POST', patient),
   createAppointment: (appointment) => sendJson('/appointments', 'POST', appointment),

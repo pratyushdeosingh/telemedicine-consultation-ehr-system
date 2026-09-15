@@ -6,7 +6,7 @@ This README is both the setup guide and the revision handbook for the project.
 
 ## 1. What the project does
 
-The current frontend provides six views:
+The current frontend provides six views and live write controls:
 
 | View | Purpose | API data used |
 | --- | --- | --- |
@@ -16,6 +16,8 @@ The current frontend provides six views:
 | Prescriptions | Groups prescribed medicines and calculates medicine totals | `GET /api/prescriptions` |
 | Billing | Compares stored invoice amounts with calculated medical costs | `GET /api/billing` |
 | System Flow | Visually explains the React-to-Oracle architecture | Static explanation |
+
+The Patients page can register patients, the Appointments page can book consultations and update their status, and the Prescriptions page can create a prescription with its first medicine item. These controls call the Express POST/PUT routes and refresh their Oracle-backed lists after success.
 
 The interface is responsive and includes loading, empty, error and retry states. It uses restrained motion and also respects the operating system's reduced-motion preference.
 
@@ -225,7 +227,6 @@ npm start
 The Express backend and React frontend are now integrated at the source and API-contract level. The backend starts without secrets, reports incomplete database configuration clearly, validates write requests, and uses explicit commit/rollback handling.
 
 - Configure a local `.env` and test every endpoint against the actual Oracle instance.
-- Add UI forms for the available POST/PUT actions if interactive record creation is required in the final demonstration.
 - Add pages for medical logs, allergies, doctors, laboratories/results and telemedicine session links if those items are required by the DA rubric/schema.
 - Capture database output, endpoint JSON and dashboard screenshots as submission evidence.
 - Perform one clean end-to-end rehearsal with Oracle running.
