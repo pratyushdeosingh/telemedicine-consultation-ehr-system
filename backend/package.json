@@ -5,7 +5,13 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch server.js",
+    "db:setup": "node scripts/setupDatabase.js",
+    "db:upgrade-da2": "node scripts/runSqlFile.js ../database/da2_upgrade.sql",
+    "db:queries": "node scripts/runSqlFile.js ../database/queries.sql",
+    "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
+    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js",
+    "test": "npm run check"
   },
   "keywords": [],
   "author": "",
