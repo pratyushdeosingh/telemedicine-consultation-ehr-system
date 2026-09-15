@@ -131,6 +131,7 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 | File | Significance |
 | --- | --- |
 | `README.md` | Authoritative project architecture, inventory, setup, operation, and troubleshooting guide |
+| `.gitignore` | Excludes dependencies, secrets, generated output, logs, editor files, and local Oracle runtime files from Git |
 
 ### `database/`
 
@@ -159,6 +160,8 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 | File | Significance |
 | --- | --- |
 | `.env.example` | Documents the API base URL and preview/live data switch |
+| `.gitignore` | Excludes frontend dependencies, builds, local environment files, logs, and editor metadata |
+| `.oxlintrc.json` | Enables React/Oxc lint plugins, enforces Rules of Hooks, and warns about unsafe component exports |
 | `index.html` | Vite HTML entry document containing the React mount element |
 | `package.json` | Frontend dependencies and development, lint, build, and preview scripts |
 | `pnpm-lock.yaml` | Locks the exact pnpm dependency graph |
