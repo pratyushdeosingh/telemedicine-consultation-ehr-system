@@ -268,6 +268,7 @@ INSERT INTO MEDICINE VALUES ('MED-05', 'Cetirizine', 'Mankind Pharma', 'Tablet 1
 INSERT INTO MEDICINE VALUES ('MED-06', 'Azithromycin', 'Lupin Pharma', 'Tablet 500mg', 35.00);
 INSERT INTO MEDICINE VALUES ('MED-07', 'Pantoprazole', 'Alkem Labs', 'Tablet 40mg', 18.00);
 INSERT INTO MEDICINE VALUES ('MED-08', 'Ibuprofen', 'Abbott India', 'Tablet 400mg', 8.50);
+INSERT INTO MEDICINE VALUES ('MED-09', 'Salbutamol Inhaler', 'Cipla', 'Metered Dose Inhaler', 400.00);
 
 INSERT INTO LAB_TEST_CATALOG VALUES ('LAB-01', 'Lipid Profile', 'Blood Test', 850.00);
 INSERT INTO LAB_TEST_CATALOG VALUES ('LAB-02', 'Complete Blood Count', 'Hematology', 450.00);
@@ -367,6 +368,7 @@ INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-05', 'RX-04', 1, 'MED-04', '500mg Twi
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-06', 'RX-05', 1, 'MED-05', '10mg Once Daily', 10, 10);
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-07', 'RX-06', 1, 'MED-07', '40mg Before Food', 15, 15);
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-03', 'RX-08', 1, 'MED-08', '400mg Post Meal', 5, 10);
+INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-08', 'RX-07', 1, 'MED-09', '2 Puffs Twice Daily', 30, 1);
 
 INSERT INTO LAB_ORDER VALUES ('ORD-01', 'APT-01', 'LAB-01', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 'Routine');
 INSERT INTO LAB_ORDER VALUES ('ORD-02', 'APT-02', 'LAB-03', TO_DATE('2026-09-12', 'YYYY-MM-DD'), 'Urgent');
@@ -386,13 +388,13 @@ INSERT INTO TEST_RESULT VALUES ('ORD-06', 1, 'TSH: 2.5 mIU/L', TO_DATE('2026-09-
 INSERT INTO TEST_RESULT VALUES ('ORD-07', 1, 'ALT/AST: Normal', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 'Liver healthy', '/reports/ord07_res1.pdf', 'PDF');
 INSERT INTO TEST_RESULT VALUES ('ORD-08', 1, 'Serum Creatinine: 0.9 mg/dL', TO_DATE('2026-09-17', 'YYYY-MM-DD'), 'Kidney healthy', '/reports/ord08_res1.pdf', 'PDF');
 
-INSERT INTO BILLING_INVOICE VALUES ('APT-01', 'INV-01', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 1005.00, 'Paid');
-INSERT INTO BILLING_INVOICE VALUES ('APT-02', 'INV-02', TO_DATE('2026-09-12', 'YYYY-MM-DD'), 4500.00, 'Pending');
-INSERT INTO BILLING_INVOICE VALUES ('APT-03', 'INV-03', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 800.00, 'Pending');
-INSERT INTO BILLING_INVOICE VALUES ('APT-04', 'INV-04', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 950.00, 'Paid');
-INSERT INTO BILLING_INVOICE VALUES ('APT-05', 'INV-05', TO_DATE('2026-09-11', 'YYYY-MM-DD'), 1200.00, 'Pending');
-INSERT INTO BILLING_INVOICE VALUES ('APT-06', 'INV-06', TO_DATE('2026-09-13', 'YYYY-MM-DD'), 1100.00, 'Paid');
-INSERT INTO BILLING_INVOICE VALUES ('APT-07', 'INV-07', TO_DATE('2026-09-14', 'YYYY-MM-DD'), 1450.00, 'Pending');
+INSERT INTO BILLING_INVOICE VALUES ('APT-01', 'INV-01', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 1665.00, 'Paid');
+INSERT INTO BILLING_INVOICE VALUES ('APT-02', 'INV-02', TO_DATE('2026-09-12', 'YYYY-MM-DD'), 4530.00, 'Pending');
+INSERT INTO BILLING_INVOICE VALUES ('APT-03', 'INV-03', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 585.00, 'Pending');
+INSERT INTO BILLING_INVOICE VALUES ('APT-04', 'INV-04', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 625.00, 'Paid');
+INSERT INTO BILLING_INVOICE VALUES ('APT-05', 'INV-05', TO_DATE('2026-09-11', 'YYYY-MM-DD'), 1320.00, 'Pending');
+INSERT INTO BILLING_INVOICE VALUES ('APT-06', 'INV-06', TO_DATE('2026-09-13', 'YYYY-MM-DD'), 815.00, 'Paid');
+INSERT INTO BILLING_INVOICE VALUES ('APT-07', 'INV-07', TO_DATE('2026-09-14', 'YYYY-MM-DD'), 1170.00, 'Pending');
 INSERT INTO BILLING_INVOICE VALUES ('APT-08', 'INV-08', TO_DATE('2026-09-16', 'YYYY-MM-DD'), 1350.00, 'Pending');
 
 COMMIT;
@@ -405,7 +407,76 @@ CREATE SEQUENCE seq_appointment_id START WITH 9 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE seq_invoice_id START WITH 9 INCREMENT BY 1 NOCACHE;
 
 -- ========================================================
--- 6. VERIFICATION & RECORD COUNT CHECKS
+-- 6. PL/SQL BUSINESS OPERATIONS USED BY THE EXPRESS API
+-- ========================================================
+CREATE OR REPLACE FUNCTION Calculate_Invoice_Total (
+    p_appointment_id IN VARCHAR2
+) RETURN NUMBER
+IS
+    v_medicine_total NUMBER(10, 2) := 0;
+    v_lab_total NUMBER(10, 2) := 0;
+BEGIN
+    SELECT NVL(SUM(pi.Quantity * m.Unit_Price), 0)
+    INTO v_medicine_total
+    FROM PRESCRIPTION_ITEM pi
+    JOIN MEDICINE m ON m.Medicine_ID = pi.Medicine_ID
+    WHERE pi.Appointment_ID = p_appointment_id;
+
+    SELECT NVL(SUM(lt.Standard_Cost), 0)
+    INTO v_lab_total
+    FROM LAB_ORDER lo
+    JOIN LAB_TEST_CATALOG lt ON lt.Test_Catalog_ID = lo.Test_Catalog_ID
+    WHERE lo.Appointment_ID = p_appointment_id;
+
+    RETURN v_medicine_total + v_lab_total;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE Register_New_Patient (
+    p_first_name IN VARCHAR2,
+    p_last_name IN VARCHAR2,
+    p_street IN VARCHAR2,
+    p_city IN VARCHAR2,
+    p_state IN VARCHAR2,
+    p_zip_code IN VARCHAR2,
+    p_dob IN DATE,
+    p_gender IN VARCHAR2,
+    p_emergency_contact IN VARCHAR2,
+    p_policy_no IN VARCHAR2
+)
+IS
+    v_patient_id PATIENT.Patient_ID%TYPE;
+BEGIN
+    v_patient_id := 'PAT-' || LPAD(seq_patient_id.NEXTVAL, 2, '0');
+
+    INSERT INTO PATIENT (
+        Patient_ID, Policy_No, First_Name, Last_Name, Street, City,
+        State, Zip_Code, DOB, Gender, Emergency_Contact
+    ) VALUES (
+        v_patient_id, p_policy_no, p_first_name, p_last_name, p_street, p_city,
+        p_state, p_zip_code, p_dob, p_gender, p_emergency_contact
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE Update_Appointment_Status (
+    p_appointment_id IN VARCHAR2,
+    p_status IN VARCHAR2
+)
+IS
+BEGIN
+    UPDATE APPOINTMENT
+    SET Status = p_status
+    WHERE Appointment_ID = p_appointment_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Appointment not found');
+    END IF;
+END;
+/
+
+-- ========================================================
+-- 7. VERIFICATION & RECORD COUNT CHECKS
 -- ========================================================
 SELECT 'PATIENT' AS Table_Name, COUNT(*) AS Total FROM PATIENT
 UNION ALL SELECT 'DOCTOR', COUNT(*) FROM DOCTOR

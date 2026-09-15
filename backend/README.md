@@ -5,10 +5,11 @@
 ```bash
 npm ci
 copy .env.example .env
+npm run db:setup
 npm start
 ```
 
-Edit `.env` with the Oracle account and connect string for your machine. The API runs on `http://localhost:3000` by default. Real credentials and `.env` must never be committed.
+Edit `.env` with the Oracle account and connect string for your machine. `npm run db:setup` recreates the project tables and sample data, so use it only for a local/demo schema whose existing project data may be replaced. The API runs on `http://localhost:3000` by default. Real credentials and `.env` must never be committed.
 
 Use these checks before integration:
 

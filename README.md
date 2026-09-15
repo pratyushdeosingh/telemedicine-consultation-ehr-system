@@ -106,7 +106,7 @@ An API may return one row per prescribed medicine. The prescriptions page groups
 
 ### Billing reconciliation
 
-The billing page shows both the stored invoice amount and the amount calculated from medicine/lab data. A variance is intentionally highlighted rather than hidden. The database/backend team must decide which source is authoritative and correct either the source data or the calculation rule.
+The billing page shows both the stored invoice amount and the amount calculated from medicine/lab data. Any future variance is highlighted rather than hidden. The committed sample invoices are reconciled with the PL/SQL calculation.
 
 ### Dashboard aggregation
 
@@ -215,7 +215,8 @@ Local backend configuration:
 cd backend
 npm ci
 copy .env.example .env
-# Edit .env with the local Oracle credentials, then:
+# Edit .env with local Oracle credentials. The next command resets demo tables:
+npm run db:setup
 npm start
 ```
 
@@ -224,7 +225,6 @@ npm start
 The Express backend and React frontend are now integrated at the source and API-contract level. The backend starts without secrets, reports incomplete database configuration clearly, validates write requests, and uses explicit commit/rollback handling.
 
 - Configure a local `.env` and test every endpoint against the actual Oracle instance.
-- Confirm that the teammate's Oracle-side billing correction and APT-08 prescription item exist in the shared database script or a committed migration; the current remote `database` branch predates those two corrections.
 - Add UI forms for the available POST/PUT actions if interactive record creation is required in the final demonstration.
 - Add pages for medical logs, allergies, doctors, laboratories/results and telemedicine session links if those items are required by the DA rubric/schema.
 - Capture database output, endpoint JSON and dashboard screenshots as submission evidence.
