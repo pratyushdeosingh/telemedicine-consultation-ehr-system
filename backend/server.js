@@ -4,8 +4,10 @@ const oracledb = require('oracledb');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+
+app.use(cors({ origin: allowedOrigin }));
 
 app.use(express.json());
 
@@ -14,6 +16,23 @@ const dbConfig = {
     password: process.env.ORACLE_PASSWORD,
     connectString: process.env.ORACLE_CONNECT_STRING
 };
+
+const requiredDbConfig = ['ORACLE_USER', 'ORACLE_PASSWORD', 'ORACLE_CONNECT_STRING'];
+const missingDbConfig = requiredDbConfig.filter((name) => !process.env[name]);
+
+function requireFields(body, fields) {
+    return fields.filter((field) => {
+        const value = body[field];
+        return value === undefined || value === null || value === '';
+    });
+}
+
+function sendValidationError(res, missingFields) {
+    return res.status(400).json({
+        success: false,
+        error: `Missing required fields: ${missingFields.join(', ')}`
+    });
+}
 
 app.get('/', (req, res) => {
     res.json({
@@ -25,6 +44,13 @@ app.get('/api/test-db', async (req, res) => {
     let connection;
 
     try {
+        if (missingDbConfig.length > 0) {
+            return res.status(503).json({
+                success: false,
+                error: `Backend database configuration is incomplete: ${missingDbConfig.join(', ')}`
+            });
+        }
+
         connection = await oracledb.getConnection(dbConfig);
 
         const result = await connection.execute(
@@ -598,6 +624,16 @@ app.post('/api/patients', async (req, res) => {
             policy_no
         } = req.body;
 
+        const missingFields = requireFields(req.body, [
+            'first_name',
+            'last_name',
+            'dob'
+        ]);
+
+        if (missingFields.length > 0) {
+            return sendValidationError(res, missingFields);
+        }
+
         connection = await oracledb.getConnection(dbConfig);
 
         await connection.execute(
@@ -631,6 +667,8 @@ app.post('/api/patients', async (req, res) => {
             }
         );
 
+        await connection.commit();
+
         res.status(201).json({
             success: true,
             message: 'Patient registered successfully'
@@ -638,6 +676,10 @@ app.post('/api/patients', async (req, res) => {
 
     } catch (err) {
         console.error(err);
+
+        if (connection) {
+            await connection.rollback();
+        }
 
         res.status(500).json({
             success: false,
@@ -664,6 +706,19 @@ app.post('/api/appointments', async (req, res) => {
             consultation_mode,
             meeting_link
         } = req.body;
+
+        const missingFields = requireFields(req.body, [
+            'patient_id',
+            'doctor_id',
+            'appointment_date',
+            'appointment_time',
+            'status',
+            'consultation_mode'
+        ]);
+
+        if (missingFields.length > 0) {
+            return sendValidationError(res, missingFields);
+        }
 
         connection = await oracledb.getConnection(dbConfig);
 
@@ -750,6 +805,38 @@ app.post('/api/prescriptions', async (req, res) => {
             pharmacy_id,
             items
         } = req.body;
+
+        const missingFields = requireFields(req.body, [
+            'appointment_id',
+            'prescription_no',
+            'issue_date'
+        ]);
+
+        if (missingFields.length > 0) {
+            return sendValidationError(res, missingFields);
+        }
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'At least one prescription item is required'
+            });
+        }
+
+        const invalidItemIndex = items.findIndex((item) => requireFields(item, [
+            'item_seq_no',
+            'medicine_id',
+            'dosage',
+            'duration_days',
+            'quantity'
+        ]).length > 0);
+
+        if (invalidItemIndex !== -1) {
+            return res.status(400).json({
+                success: false,
+                error: `Prescription item ${invalidItemIndex + 1} is incomplete`
+            });
+        }
 
         connection = await oracledb.getConnection(dbConfig);
 
@@ -848,6 +935,15 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
         const { appointment_id } = req.params;
         const { status } = req.body;
 
+        const allowedStatuses = ['Scheduled', 'Completed', 'Cancelled', 'In-Progress'];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Status must be one of: ${allowedStatuses.join(', ')}`
+            });
+        }
+
         connection = await oracledb.getConnection(dbConfig);
 
         await connection.execute(
@@ -865,6 +961,8 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
             }
         );
 
+        await connection.commit();
+
         res.json({
             success: true,
             message: 'Appointment status updated successfully',
@@ -874,6 +972,10 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
 
     } catch (err) {
         console.error(err);
+
+        if (connection) {
+            await connection.rollback();
+        }
 
         res.status(500).json({
             success: false,
@@ -889,4 +991,7 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
+    if (missingDbConfig.length > 0) {
+        console.warn(`Database configuration missing: ${missingDbConfig.join(', ')}`);
+    }
 });
