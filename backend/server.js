@@ -178,7 +178,8 @@ app.get('/api/medicines', async (req, res) => {
                 Medicine_Name,
                 Manufacturer,
                 Dosage_Form,
-                Unit_Price
+                Unit_Price,
+                Allergen_Class
             FROM MEDICINE
             ORDER BY Medicine_ID
         `);
@@ -188,7 +189,8 @@ app.get('/api/medicines', async (req, res) => {
             medicine_name: row[1],
             manufacturer: row[2],
             dosage_form: row[3],
-            unit_price: row[4]
+            unit_price: row[4],
+            allergen_class: row[5]
         }));
 
         res.json(medicines);
@@ -916,9 +918,13 @@ app.post('/api/prescriptions', async (req, res) => {
             await connection.rollback();
         }
 
-        res.status(500).json({
+        const isAllergyConflict = err.errorNum === 20002;
+
+        res.status(isAllergyConflict ? 409 : 500).json({
             success: false,
-            error: err.message
+            error: isAllergyConflict
+                ? err.message.replace(/^ORA-20002:\s*/, '').split('\n')[0]
+                : err.message
         });
 
     } finally {

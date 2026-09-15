@@ -66,6 +66,7 @@ CREATE TABLE MEDICINE (
     Medicine_Name VARCHAR2(70) NOT NULL,
     Manufacturer VARCHAR2(70) NOT NULL,
     Dosage_Form VARCHAR2(30) NOT NULL,
+    Allergen_Class VARCHAR2(50),
     Unit_Price NUMBER(8, 2) NOT NULL,
     CONSTRAINT pk_medicine PRIMARY KEY (Medicine_ID)
 );
@@ -260,15 +261,15 @@ INSERT INTO PHARMACY VALUES ('PHARM-06', 'Frank Ross Pharmacy', 'Mylapore', '987
 INSERT INTO PHARMACY VALUES ('PHARM-07', 'Sanjivani Medicos', 'Tambaram West', '9876543216');
 INSERT INTO PHARMACY VALUES ('PHARM-08', 'HealthKart Pharmacy', 'Anna Nagar', '9876543217');
 
-INSERT INTO MEDICINE VALUES ('MED-01', 'Amoxicillin', 'Cipla', 'Capsule 500mg', 15.50);
-INSERT INTO MEDICINE VALUES ('MED-02', 'Paracetamol', 'Sun Pharma', 'Tablet 650mg', 5.00);
-INSERT INTO MEDICINE VALUES ('MED-03', 'Atorvastatin', 'Dr. Reddys Lab', 'Tablet 10mg', 22.00);
-INSERT INTO MEDICINE VALUES ('MED-04', 'Metformin', 'Zydus Healthcare', 'Tablet 500mg', 12.00);
-INSERT INTO MEDICINE VALUES ('MED-05', 'Cetirizine', 'Mankind Pharma', 'Tablet 10mg', 6.50);
-INSERT INTO MEDICINE VALUES ('MED-06', 'Azithromycin', 'Lupin Pharma', 'Tablet 500mg', 35.00);
-INSERT INTO MEDICINE VALUES ('MED-07', 'Pantoprazole', 'Alkem Labs', 'Tablet 40mg', 18.00);
-INSERT INTO MEDICINE VALUES ('MED-08', 'Ibuprofen', 'Abbott India', 'Tablet 400mg', 8.50);
-INSERT INTO MEDICINE VALUES ('MED-09', 'Salbutamol Inhaler', 'Cipla', 'Metered Dose Inhaler', 400.00);
+INSERT INTO MEDICINE VALUES ('MED-01', 'Amoxicillin', 'Cipla', 'Capsule 500mg', 'Penicillin', 15.50);
+INSERT INTO MEDICINE VALUES ('MED-02', 'Paracetamol', 'Sun Pharma', 'Tablet 650mg', NULL, 5.00);
+INSERT INTO MEDICINE VALUES ('MED-03', 'Atorvastatin', 'Dr. Reddys Lab', 'Tablet 10mg', NULL, 22.00);
+INSERT INTO MEDICINE VALUES ('MED-04', 'Metformin', 'Zydus Healthcare', 'Tablet 500mg', NULL, 12.00);
+INSERT INTO MEDICINE VALUES ('MED-05', 'Cetirizine', 'Mankind Pharma', 'Tablet 10mg', NULL, 6.50);
+INSERT INTO MEDICINE VALUES ('MED-06', 'Azithromycin', 'Lupin Pharma', 'Tablet 500mg', NULL, 35.00);
+INSERT INTO MEDICINE VALUES ('MED-07', 'Pantoprazole', 'Alkem Labs', 'Tablet 40mg', NULL, 18.00);
+INSERT INTO MEDICINE VALUES ('MED-08', 'Ibuprofen', 'Abbott India', 'Tablet 400mg', 'NSAID', 8.50);
+INSERT INTO MEDICINE VALUES ('MED-09', 'Salbutamol Inhaler', 'Cipla', 'Metered Dose Inhaler', NULL, 400.00);
 
 INSERT INTO LAB_TEST_CATALOG VALUES ('LAB-01', 'Lipid Profile', 'Blood Test', 850.00);
 INSERT INTO LAB_TEST_CATALOG VALUES ('LAB-02', 'Complete Blood Count', 'Hematology', 450.00);
@@ -360,7 +361,7 @@ INSERT INTO PRESCRIPTION VALUES ('APT-07', 'RX-06', 'PHARM-06', TO_DATE('2026-09
 INSERT INTO PRESCRIPTION VALUES ('APT-08', 'RX-07', 'PHARM-07', TO_DATE('2026-09-16', 'YYYY-MM-DD'), 'Inhale twice daily');
 INSERT INTO PRESCRIPTION VALUES ('APT-03', 'RX-08', 'PHARM-08', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 'Take pain relief as needed');
 
-INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-01', 'RX-01', 1, 'MED-01', '500mg Twice Daily', 5, 10);
+INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-01', 'RX-01', 1, 'MED-02', '650mg As needed', 5, 10);
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-01', 'RX-01', 2, 'MED-03', '10mg Once Daily', 30, 30);
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-02', 'RX-02', 1, 'MED-02', '650mg As needed', 3, 6);
 INSERT INTO PRESCRIPTION_ITEM VALUES ('APT-04', 'RX-03', 1, 'MED-06', '500mg Once Daily', 5, 5);
@@ -388,7 +389,7 @@ INSERT INTO TEST_RESULT VALUES ('ORD-06', 1, 'TSH: 2.5 mIU/L', TO_DATE('2026-09-
 INSERT INTO TEST_RESULT VALUES ('ORD-07', 1, 'ALT/AST: Normal', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 'Liver healthy', '/reports/ord07_res1.pdf', 'PDF');
 INSERT INTO TEST_RESULT VALUES ('ORD-08', 1, 'Serum Creatinine: 0.9 mg/dL', TO_DATE('2026-09-17', 'YYYY-MM-DD'), 'Kidney healthy', '/reports/ord08_res1.pdf', 'PDF');
 
-INSERT INTO BILLING_INVOICE VALUES ('APT-01', 'INV-01', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 1665.00, 'Paid');
+INSERT INTO BILLING_INVOICE VALUES ('APT-01', 'INV-01', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 1560.00, 'Paid');
 INSERT INTO BILLING_INVOICE VALUES ('APT-02', 'INV-02', TO_DATE('2026-09-12', 'YYYY-MM-DD'), 4530.00, 'Pending');
 INSERT INTO BILLING_INVOICE VALUES ('APT-03', 'INV-03', TO_DATE('2026-09-15', 'YYYY-MM-DD'), 585.00, 'Pending');
 INSERT INTO BILLING_INVOICE VALUES ('APT-04', 'INV-04', TO_DATE('2026-09-10', 'YYYY-MM-DD'), 625.00, 'Paid');
@@ -471,6 +472,46 @@ BEGIN
 
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20001, 'Appointment not found');
+    END IF;
+END;
+/
+
+-- Prevent a medicine from being prescribed when its allergen class appears in
+-- any medical-log allergy recorded for the appointment's patient.
+CREATE OR REPLACE TRIGGER Prevent_Allergic_Prescription
+BEFORE INSERT OR UPDATE OF Medicine_ID ON PRESCRIPTION_ITEM
+FOR EACH ROW
+DECLARE
+    v_patient_id PATIENT.Patient_ID%TYPE;
+    v_medicine_name MEDICINE.Medicine_Name%TYPE;
+    v_allergen_class MEDICINE.Allergen_Class%TYPE;
+    v_conflict_count NUMBER;
+BEGIN
+    SELECT a.Patient_ID
+    INTO v_patient_id
+    FROM APPOINTMENT a
+    WHERE a.Appointment_ID = :NEW.Appointment_ID;
+
+    SELECT m.Medicine_Name, m.Allergen_Class
+    INTO v_medicine_name, v_allergen_class
+    FROM MEDICINE m
+    WHERE m.Medicine_ID = :NEW.Medicine_ID;
+
+    IF v_allergen_class IS NOT NULL THEN
+        SELECT COUNT(*)
+        INTO v_conflict_count
+        FROM LOG_ALLERGIES la
+        WHERE la.Patient_ID = v_patient_id
+          AND UPPER(TRIM(la.Allergy_Name)) = UPPER(TRIM(v_allergen_class));
+
+        IF v_conflict_count > 0 THEN
+            RAISE_APPLICATION_ERROR(
+                -20002,
+                'Allergy conflict: ' || v_medicine_name ||
+                ' belongs to allergen class ' || v_allergen_class ||
+                ' for patient ' || v_patient_id
+            );
+        END IF;
     END IF;
 END;
 /

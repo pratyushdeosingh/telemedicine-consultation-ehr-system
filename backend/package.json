@@ -7,8 +7,11 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:setup": "node scripts/setupDatabase.js",
-    "check": "node --check server.js && node --check scripts/setupDatabase.js",
-    "test": "node --check server.js && node --check scripts/setupDatabase.js"
+    "db:upgrade-da2": "node scripts/runSqlFile.js ../database/da2_upgrade.sql",
+    "db:queries": "node scripts/runSqlFile.js ../database/queries.sql",
+    "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
+    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js",
+    "test": "npm run check"
   },
   "keywords": [],
   "author": "",
