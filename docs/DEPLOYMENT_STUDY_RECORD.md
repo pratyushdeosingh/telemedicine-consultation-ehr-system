@@ -26,10 +26,16 @@ The user downloaded an **instance wallet ZIP** and entered the database-user and
 A fresh fetch found `origin/backend` at `ecf70ff` and `origin/database` at `9243825`. These commits were made from older branch points, so their full trees should not replace the newer deployment branch.
 
 - The backend teammate's API, setup script, and SQL runner were already represented on `main`. The current versions also support Oracle wallets, production login, safer error responses, and Vercel. Taking the older backend files wholesale would remove those protections.
-- The database teammate added `telemedicine_session_trigger.sql`. Its `AFTER INSERT` trigger creates a placeholder `TELEMEDICINE_SESSION` when an appointment's mode is `Virtual`. The trigger has been copied into the combined repository and added to the full schema script; installing it in the already-running Oracle schema is a separate, non-destructive step.
+- The database teammate added `telemedicine_session_trigger.sql`. Its `AFTER INSERT` trigger creates a placeholder `TELEMEDICINE_SESSION` when an appointment's mode is `Virtual`. The trigger was copied into the combined repository, added to the full schema script, and installed on the running Oracle schema with `npm run db:telemedicine-trigger` after a temporary `CREATE TRIGGER` grant.
 - Obsolete Azure App Service and Ubuntu VM/Caddy deployment files were removed. The decision history stays in this study record, while `deploy/VERCEL.md` is the active hosting guide.
 
-Before this new trigger is installed, the live Oracle database has one trigger (allergy safety). After installation it should have two. Do not rerun `db:setup` merely to install the new trigger: it drops project tables.
+The live Oracle trigger was reported `VALID`. A synthetic Virtual appointment created exactly one matching session in the same transaction; the test then rolled back and verified that its appointment was absent. No test appointment was retained. Revoke the temporary `CREATE TRIGGER` grant as `ADMIN` after this installation. Do not rerun `db:setup` merely to install the new trigger: it drops project tables.
+
+## Repository cleanup and deployment audit (17 September 2026)
+
+- The tracked tree contains the Vercel guide and setup helper, with no remaining Azure App Service, VM service, or Caddy deployment files. The temporary local trigger-check script and the obsolete pre-Oracle `.env` backup were removed after the successful check. The active ignored `backend/.env` remains necessary for local Oracle access.
+- The frontend preview data switch remains for offline course demonstrations and disables writes. The Vercel production build explicitly sets `VITE_USE_DEMO_DATA=false`, so deployed reads use Oracle. The SQL upgrade and trigger demonstration scripts, checklist, and report draft remain because they are reproducible study evidence.
+- The repository is prepared for a Vercel production deployment, but a live Vercel build, environment-variable setup, API smoke test, and cron check have not happened yet. Do not describe the website as deployed or fully verified until those checks pass.
 
 ## Deployment architecture
 
@@ -65,7 +71,7 @@ FROM TELEMEDICINE_APP;
 REVOKE RESOURCE FROM TELEMEDICINE_APP;
 ```
 
-`backend/scripts/setupDatabase.js` reads `database/telemedicine_ehr.sql`. **Do not rerun** `npm run db:setup` after preserving any new records: it drops and recreates project tables. The database script defines 18 project tables, sample data, indexes, sequences, two procedures, one function, and an allergy-safety trigger. `database/queries.sql` contains labelled evidence queries; `database/trigger_demo.sql` demonstrates the allergy rejection.
+`backend/scripts/setupDatabase.js` reads `database/telemedicine_ehr.sql`. **Do not rerun** `npm run db:setup` after preserving any new records: it drops and recreates project tables. The database script defines 18 project tables, sample data, indexes, sequences, two procedures, one function, an allergy-safety trigger, and the virtual-session trigger. `database/queries.sql` contains labelled evidence queries; `database/trigger_demo.sql` demonstrates the allergy rejection.
 
 ## Questions an examiner might ask
 
@@ -88,7 +94,8 @@ REVOKE RESOURCE FROM TELEMEDICINE_APP;
 ## Still to do
 
 - [ ] Create a Vercel Hobby project from GitHub `main` with the repository root as the Vercel root directory.
-- [ ] Install and test the teammate's virtual-session trigger on the live schema, then revoke temporary `CREATE TRIGGER` again.
+- [x] Install and test the teammate's virtual-session trigger on the live schema with a rolled-back synthetic appointment.
+- [ ] Confirm that `ADMIN` revoked the temporary `CREATE TRIGGER` privilege again.
 - [ ] Generate and privately store the demo password hash, session secret, and cron secret.
 - [ ] Add the Oracle connection and auth values to **Production** environment variables in Vercel; never use `VITE_` for secrets.
 - [ ] Deploy and verify unauthenticated `401`, login, Oracle-backed reads, a synthetic write, direct-page refresh, and cron logs.
