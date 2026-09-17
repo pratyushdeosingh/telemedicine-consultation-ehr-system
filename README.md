@@ -42,7 +42,7 @@ Oracle Database
 5. `useApiResource` tracks loading, success, error, and retry state.
 6. React renders the returned records. Oracle remains the authoritative data store.
 
-The Vite proxy is only for local development. A deployed frontend must use the public HTTPS backend URL in `VITE_API_URL`.
+The Vite proxy is only for local development. In the Vercel deployment, the frontend and Express API share one HTTPS origin and the frontend uses `/api`. See `deploy/VERCEL.md` for the deployment checklist and `docs/DEPLOYMENT_STUDY_RECORD.md` for the dated study record.
 
 ## 3. Technology stack
 
