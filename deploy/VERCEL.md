@@ -13,7 +13,7 @@ In Oracle Database Actions as `ADMIN`, create a dedicated schema user (replace t
 ```sql
 CREATE USER TELEMEDICINE_APP IDENTIFIED BY "choose-a-unique-long-password";
 GRANT CREATE SESSION, CREATE TABLE, CREATE SEQUENCE, CREATE PROCEDURE, CREATE TRIGGER TO TELEMEDICINE_APP;
-ALTER USER TELEMEDICINE_APP QUOTA UNLIMITED ON DATA;
+ALTER USER TELEMEDICINE_APP QUOTA 1G ON DATA;
 ```
 
 `DATA` is the usual ADB default tablespace; use the actual tablespace if yours differs. Do not use `ADMIN` as the website's database user.
@@ -26,11 +26,12 @@ Unzip the wallet locally. Copy the full `low` service descriptor from `tnsnames.
 
 Do not send the resulting value or any password in chat. On your own computer, put the schema username, password, descriptor, wallet base64, and wallet password in `backend/.env` (which Git ignores). From `backend/`, run `npm run db:setup` **once in the fresh empty schema**. This script drops existing project tables. Check `npm run db:queries` afterward. Do not rerun setup after keeping records you need.
 
-After setup succeeds, return to Oracle Database Actions SQL as `ADMIN` and revoke the schema-creation privileges from the website account. It retains `CREATE SESSION` and can still read and write its own tables and execute its own stored routines. A future schema migration will require temporarily granting the needed creation privileges again.
+After setup succeeds, return to Oracle Database Actions SQL as `ADMIN` and revoke the schema-creation privileges from the website account. If the account was created through Database Actions, also revoke its default `RESOURCE` role, which grants object-creation privileges. Keep `CONNECT` and the direct `CREATE SESSION` privilege. The account can still read and write its own tables and execute its own stored routines. A future schema migration will require temporarily granting the needed creation privileges again.
 
 ```sql
 REVOKE CREATE TABLE, CREATE SEQUENCE, CREATE PROCEDURE, CREATE TRIGGER
 FROM TELEMEDICINE_APP;
+REVOKE RESOURCE FROM TELEMEDICINE_APP;
 ```
 
 On Windows, `deploy/setup-oracle-local.ps1` can create the ignored `backend/.env` from an instance wallet ZIP and two hidden password prompts. It defaults to `Downloads/Wallet_TELEMEHR.zip`; pass `-WalletZip` if your file has another name. It backs up an existing `backend/.env` before replacing it. Run it locally from the repository root, then run `npm run db:setup` from `backend/` on the fresh schema.
@@ -43,7 +44,7 @@ The application login uses a secure HttpOnly cookie valid for eight hours. The s
 
 ## 3. Vercel project
 
-Use the existing GitHub repository (or another repository under your personal account). Confirm that no `.env`, wallet, or secret is tracked. In Vercel, choose the **Hobby** plan, import the repository, and keep the Vercel **Root Directory** at the repository root (`telemedicine-ehr-da2`, where `vercel.json` lives). Choose the branch containing these deployment files as Vercel's production branch; the current working branch is `frontend` until it is merged into `main`. The committed `vercel.json` specifies the Vite build and API routing. Select Node.js 24 in project settings if it is not selected automatically.
+Use the existing GitHub repository (or another repository under your personal account). Confirm that no `.env`, wallet, or secret is tracked. In Vercel, choose the **Hobby** plan, import the repository, and keep the Vercel **Root Directory** at the repository root (`telemedicine-ehr-da2`, where `vercel.json` lives). Use `main` as Vercel's production branch once these deployment commits are merged there. The committed `vercel.json` specifies the Vite build and API routing. Select Node.js 24 in project settings if it is not selected automatically.
 
 Before the production deployment, enter these Vercel project environment variables for **Production**:
 
