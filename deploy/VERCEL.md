@@ -26,6 +26,8 @@ Unzip the wallet locally. Copy the full `low` service descriptor from `tnsnames.
 
 Do not send the resulting value or any password in chat. On your own computer, put the schema username, password, descriptor, wallet base64, and wallet password in `backend/.env` (which Git ignores). From `backend/`, run `npm run db:setup` **once in the fresh empty schema**. This script drops existing project tables. Check `npm run db:queries` afterward. Do not rerun setup after keeping records you need.
 
+On Windows, `deploy/setup-oracle-local.ps1` can create the ignored `backend/.env` from an instance wallet ZIP and two hidden password prompts. It defaults to `Downloads/Wallet_TELEMEHR.zip`; pass `-WalletZip` if your file has another name. It backs up an existing `backend/.env` before replacing it. Run it locally from the repository root, then run `npm run db:setup` from `backend/` on the fresh schema.
+
 ## 2. Demo password
 
 From `backend/`, run `npm run auth:generate`. Save the printed demo password in your password manager. It also prints `DEMO_PASSWORD_SCRYPT`, `SESSION_SECRET`, and `CRON_SECRET`; put these only in Vercel's server-side environment settings. Never put them in `VITE_` variables or Git.
