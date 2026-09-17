@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci && cd frontend && corepack pnpm install --frozen-lockfile",
+  "buildCommand": "cd frontend && VITE_API_URL=/api VITE_USE_DEMO_DATA=false corepack pnpm build",
+  "outputDirectory": "frontend/dist",
+  "crons": [
+    { "path": "/api/cron/keepalive", "schedule": "0 6 * * *" }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index?path=:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

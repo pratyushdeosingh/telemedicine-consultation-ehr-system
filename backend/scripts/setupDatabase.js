@@ -3,6 +3,7 @@ const path = require('node:path');
 const oracledb = require('oracledb');
 
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const dbConfig = require('../dbConfig');
 
 const schemaPath = path.join(__dirname, '..', '..', 'database', 'telemedicine_ehr.sql');
 const ignoredCleanupErrors = new Set([942, 2289]);
@@ -64,11 +65,7 @@ async function main() {
     let skippedCleanup = 0;
 
     try {
-        connection = await oracledb.getConnection({
-            user: process.env.ORACLE_USER,
-            password: process.env.ORACLE_PASSWORD,
-            connectString: process.env.ORACLE_CONNECT_STRING
-        });
+        connection = await oracledb.getConnection(dbConfig);
 
         for (const statement of statements) {
             try {

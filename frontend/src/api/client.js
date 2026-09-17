@@ -5,6 +5,7 @@ export const isDemoMode = import.meta.env.VITE_USE_DEMO_DATA === 'true'
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'same-origin',
     headers: {
       Accept: 'application/json',
       ...options.headers,
@@ -41,6 +42,13 @@ function sendJson(path, method, body) {
 }
 
 export const api = {
+  getSession: () => isDemoMode ? Promise.resolve({ authenticated: true }) : request('/session'),
+  login: (password) => request('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  }),
+  logout: () => request('/logout', { method: 'POST' }),
   testConnection: () => isDemoMode ? Promise.resolve({ success: true }) : request('/test-db'),
   getPatients: () => isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),
   getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),

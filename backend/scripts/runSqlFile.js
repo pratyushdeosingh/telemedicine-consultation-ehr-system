@@ -3,6 +3,7 @@ const path = require('node:path');
 const oracledb = require('oracledb');
 
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const dbConfig = require('../dbConfig');
 
 function parseStatements(source) {
     const statements = [];
@@ -66,11 +67,7 @@ async function main() {
     let connection;
 
     try {
-        connection = await oracledb.getConnection({
-            user: process.env.ORACLE_USER,
-            password: process.env.ORACLE_PASSWORD,
-            connectString: process.env.ORACLE_CONNECT_STRING
-        });
+        connection = await oracledb.getConnection(dbConfig);
 
         for (const [index, sql] of statements.entries()) {
             const result = await connection.execute(sql, [], {

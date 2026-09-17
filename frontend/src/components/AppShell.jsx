@@ -55,7 +55,7 @@ function Brand({ compact }) {
   )
 }
 
-export function AppShell() {
+export function AppShell({ onLogout }) {
   const [isCompact, setIsCompact] = useState(false)
   const location = useLocation()
   const activeItem = navigation.find((item) => item.to === location.pathname)
@@ -105,6 +105,7 @@ export function AppShell() {
           <div className="topbar-actions">
             <span className="date-chip">{today}</span>
             <ConnectionStatus />
+            <button className="logout-button" type="button" onClick={onLogout}>Sign out</button>
           </div>
         </header>
         <div className="page-frame">

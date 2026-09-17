@@ -2,23 +2,123 @@ require('dotenv').config();
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const dbConfig = require('./dbConfig');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
+const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const publicOrigin = process.env.PUBLIC_ORIGIN;
+const serveFrontend = process.env.SERVE_FRONTEND === 'true';
+const frontendDist = path.resolve(__dirname, '../frontend/dist');
+const vercelMode = process.env.DEPLOY_TARGET === 'vercel' || Boolean(process.env.VERCEL);
+const authRequired = isProduction && process.env.EXTERNAL_AUTH !== 'true';
+const authHash = process.env.DEMO_PASSWORD_SCRYPT;
+const sessionSecret = process.env.SESSION_SECRET;
+const sessionMaxAge = 8 * 60 * 60;
 
-app.use(cors({ origin: allowedOrigin }));
+if (isProduction && (!publicOrigin || !publicOrigin.startsWith('https://'))) {
+    throw new Error('PUBLIC_ORIGIN must be an HTTPS origin in production');
+}
+if (serveFrontend && !fs.existsSync(path.join(frontendDist, 'index.html'))) {
+    throw new Error('Frontend build is missing; build frontend before starting the server');
+}
+if (authRequired && (!authHash || !sessionSecret || sessionSecret.length < 32)) {
+    throw new Error('Application authentication configuration is missing');
+}
+if (vercelMode && (!process.env.CRON_SECRET || process.env.CRON_SECRET.length < 32)) {
+    throw new Error('Cron authentication configuration is missing');
+}
 
-app.use(express.json());
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Cache-Control', 'no-store');
+    if (isProduction) {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+        res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; connect-src 'self'");
+        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    }
+    next();
+});
 
-const dbConfig = {
-    user: process.env.ORACLE_USER,
-    password: process.env.ORACLE_PASSWORD,
-    connectString: process.env.ORACLE_CONNECT_STRING
-};
+if (!isProduction) app.use(cors({ origin: allowedOrigin }));
+
+app.use(express.json({ limit: '32kb' }));
+app.use('/api', (req, res, next) => {
+    if (isProduction && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)
+        && req.get('origin') !== publicOrigin) {
+        return res.status(403).json({ error: 'Request origin is not allowed' });
+    }
+    next();
+});
+
+function sameValue(a, b) {
+    const left = Buffer.from(a);
+    const right = Buffer.from(b);
+    return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function validPassword(password) {
+    if (typeof password !== 'string' || password.length > 256) return false;
+    const [salt, hash] = (authHash || '').split(':');
+    if (!salt || !hash || !/^[a-f0-9]+$/i.test(salt + hash)) return false;
+    return sameValue(crypto.scryptSync(password, Buffer.from(salt, 'hex'), 64).toString('hex'), hash);
+}
+
+function validSession(req) {
+    const cookie = req.get('cookie')?.split(';').map((part) => part.trim())
+        .find((part) => part.startsWith('demo_session='))?.slice('demo_session='.length);
+    if (!cookie) return false;
+    const parts = cookie.split('.');
+    if (parts.length !== 3 || parts[0] !== 'v1') return false;
+    const expiry = Number(parts[1]);
+    if (!Number.isSafeInteger(expiry) || expiry < Date.now() || expiry > Date.now() + sessionMaxAge * 1000) return false;
+    const signature = crypto.createHmac('sha256', sessionSecret).update(`${parts[0]}.${parts[1]}`).digest('hex');
+    return sameValue(signature, parts[2]);
+}
+
+app.post('/api/login', (req, res) => {
+    if (!authRequired) return res.status(404).json({ error: 'Not found' });
+    if (!validPassword(req.body?.password)) return res.status(401).json({ error: 'Incorrect password' });
+    const expiry = Date.now() + sessionMaxAge * 1000;
+    const payload = `v1.${expiry}`;
+    const signature = crypto.createHmac('sha256', sessionSecret).update(payload).digest('hex');
+    res.setHeader('Set-Cookie', `demo_session=${payload}.${signature}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${sessionMaxAge}`);
+    res.json({ success: true });
+});
+
+app.post('/api/logout', (req, res) => {
+    res.setHeader('Set-Cookie', 'demo_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0');
+    res.json({ success: true });
+});
+
+app.get('/api/session', (req, res) => res.json({ authenticated: !authRequired || validSession(req) }));
+
+app.use('/api', (req, res, next) => {
+    if (req.path === '/cron/keepalive') return next();
+    if (authRequired && !validSession(req)) return res.status(401).json({ error: 'Sign in required' });
+    next();
+});
+
+function safeError(err) {
+    return isProduction ? 'The request could not be completed' : err.message;
+}
 
 const requiredDbConfig = ['ORACLE_USER', 'ORACLE_PASSWORD', 'ORACLE_CONNECT_STRING'];
 const missingDbConfig = requiredDbConfig.filter((name) => !process.env[name]);
+if (vercelMode && (!process.env.ORACLE_WALLET_B64 || !process.env.ORACLE_WALLET_PASSWORD)) {
+    missingDbConfig.push('ORACLE_WALLET_B64', 'ORACLE_WALLET_PASSWORD');
+}
+if (isProduction && missingDbConfig.length > 0) {
+    throw new Error(`Database configuration missing: ${missingDbConfig.join(', ')}`);
+}
 
 function requireFields(body, fields) {
     return fields.filter((field) => {
@@ -34,7 +134,8 @@ function sendValidationError(res, missingFields) {
     });
 }
 
-app.get('/', (req, res) => {
+app.get('/', (req, res, next) => {
+    if (serveFrontend) return next();
     res.json({
         message: 'Telemedicine API is running'
     });
@@ -47,7 +148,7 @@ app.get('/api/test-db', async (req, res) => {
         if (missingDbConfig.length > 0) {
             return res.status(503).json({
                 success: false,
-                error: `Backend database configuration is incomplete: ${missingDbConfig.join(', ')}`
+                error: isProduction ? 'Database unavailable' : `Backend database configuration is incomplete: ${missingDbConfig.join(', ')}`
             });
         }
 
@@ -66,7 +167,7 @@ app.get('/api/test-db', async (req, res) => {
         console.error(err);
         res.status(500).json({
             success: false,
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -110,7 +211,7 @@ app.get('/api/patients', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -156,7 +257,7 @@ app.get('/api/doctors', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -198,7 +299,7 @@ app.get('/api/medicines', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -236,7 +337,7 @@ app.get('/api/pharmacies', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -280,7 +381,7 @@ app.get('/api/medical-logs', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -332,7 +433,7 @@ app.get('/api/lab-orders', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -389,7 +490,7 @@ app.get('/api/test-results', async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: safeError(err) });
 
     } finally {
         if (connection) {
@@ -440,7 +541,7 @@ app.get('/api/telemedicine-sessions', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -494,7 +595,7 @@ app.get('/api/appointments', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -551,7 +652,7 @@ app.get('/api/prescriptions', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -599,7 +700,7 @@ app.get('/api/billing', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -685,7 +786,7 @@ app.post('/api/patients', async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -785,7 +886,7 @@ app.post('/api/appointments', async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -923,8 +1024,8 @@ app.post('/api/prescriptions', async (req, res) => {
         res.status(isAllergyConflict ? 409 : 500).json({
             success: false,
             error: isAllergyConflict
-                ? err.message.replace(/^ORA-20002:\s*/, '').split('\n')[0]
-                : err.message
+                ? 'The selected medicine conflicts with a recorded allergy'
+                : safeError(err)
         });
 
     } finally {
@@ -985,7 +1086,7 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: err.message
+            error: safeError(err)
         });
 
     } finally {
@@ -995,9 +1096,48 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-    if (missingDbConfig.length > 0) {
-        console.warn(`Database configuration missing: ${missingDbConfig.join(', ')}`);
+if (serveFrontend) {
+    app.use(express.static(frontendDist, { index: false }));
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api') && req.accepts('html')) {
+            return res.sendFile(path.join(frontendDist, 'index.html'));
+        }
+        next();
+    });
+}
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    if (res.headersSent) return next(err);
+    const status = err.status >= 400 && err.status < 500 ? err.status : 500;
+    res.status(status).json({ error: status === 500 ? safeError(err) : 'Invalid request' });
+});
+
+app.get('/api/cron/keepalive', async (req, res) => {
+    const expected = process.env.CRON_SECRET;
+    if (!vercelMode || !expected || !sameValue(req.get('authorization') || '', `Bearer ${expected}`)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        await connection.execute('SELECT 1 FROM DUAL');
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(503).json({ error: 'Database unavailable' });
+    } finally {
+        if (connection) await connection.close();
     }
 });
+
+if (require.main === module) {
+    app.listen(PORT, HOST, () => {
+        console.log(`Server running at http://${HOST}:${PORT}`);
+        if (missingDbConfig.length > 0) {
+            console.warn(`Database configuration missing: ${missingDbConfig.join(', ')}`);
+        }
+    });
+}
+
+module.exports = app;

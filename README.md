@@ -425,7 +425,7 @@ The host needs a single-page-application fallback that sends unknown frontend pa
 
 ## 15. Scope and security
 
-This is an academic prototype, not a production healthcare system. Authentication, role-based authorization, audit logging, consent management, regulatory compliance, production secret management, rate limiting, database pooling, and deployment hardening are not yet implemented. Do not store real patient information or expose the current write API publicly.
+This is an academic prototype, not a production healthcare system. The recommended student deployment is [Vercel Hobby with Oracle Autonomous Database](deploy/VERCEL.md). The [Oracle VM](deploy/README.md) and [Azure App Service](deploy/AZURE_APP_SERVICE.md) guides describe alternatives. Vercel mode adds a shared demo login, secure session cookie, wallet-based Oracle mTLS, and a daily database keepalive. The application does not provide individual accounts, role-based authorization, audit logging, consent management, or healthcare regulatory compliance. Do not store real patient information.
 
 ## 16. Short viva explanation
 
