@@ -8,10 +8,11 @@ const dbConfig = require('./dbConfig');
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
-const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
-const publicOrigin = process.env.PUBLIC_ORIGIN;
 const vercelMode = process.env.DEPLOY_TARGET === 'vercel' || Boolean(process.env.VERCEL);
+const isProduction = process.env.NODE_ENV === 'production' || vercelMode;
+const publicOrigin = process.env.PUBLIC_ORIGIN || (vercelMode && process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined);
 const authRequired = isProduction;
 const authHash = process.env.DEMO_PASSWORD_SCRYPT;
 const sessionSecret = process.env.SESSION_SECRET;

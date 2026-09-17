@@ -5,10 +5,11 @@ const http = require('node:http');
 
 const password = 'synthetic-demo-password';
 const salt = crypto.randomBytes(16);
-process.env.NODE_ENV = 'production';
+delete process.env.NODE_ENV;
 process.env.VERCEL = '1';
 process.env.EXTERNAL_AUTH = 'true';
-process.env.PUBLIC_ORIGIN = 'https://demo.vercel.app';
+delete process.env.PUBLIC_ORIGIN;
+process.env.VERCEL_PROJECT_PRODUCTION_URL = 'demo.vercel.app';
 process.env.ORACLE_USER = 'unused';
 process.env.ORACLE_PASSWORD = 'unused';
 process.env.ORACLE_CONNECT_STRING = 'unused';
@@ -37,7 +38,7 @@ test('demo API requires login and rejects a foreign origin', async () => {
 
         const login = await fetch(`${base}/api/login`, {
             method: 'POST',
-            headers: { Origin: process.env.PUBLIC_ORIGIN, 'Content-Type': 'application/json' },
+            headers: { Origin: 'https://demo.vercel.app', 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })
         });
         assert.equal(login.status, 200);

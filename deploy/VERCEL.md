@@ -38,7 +38,9 @@ On Windows, `deploy/setup-oracle-local.ps1` can create the ignored `backend/.env
 
 ## 2. Demo password
 
-From `backend/`, run `npm run auth:generate`. Save the printed demo password in your password manager. It also prints `DEMO_PASSWORD_SCRYPT`, `SESSION_SECRET`, and `CRON_SECRET`; put these only in Vercel's server-side environment settings. Never put them in `VITE_` variables or Git.
+The easiest setup is to run `node deploy/prepare-vercel-env.js` from the repository root after `backend/.env` works. It creates an ignored `.env.vercel-import` containing the Oracle connection values, the demo password hash, and fresh session and cron secrets. Save the printed demo password privately. In Vercel, select **Production only**, use **Import .env** to import that file, then delete the local `.env.vercel-import` after confirming the keys were added. Never send the file or a screenshot of its values in chat.
+
+Alternatively, from `backend/`, run `npm run auth:generate` and add the printed values manually. Never put secrets in `VITE_` variables or Git.
 
 The application login uses a secure HttpOnly cookie valid for eight hours. The static shell is public, but Oracle API data and writes require this login. Give the demo password only to the people who need the demonstration.
 
@@ -50,9 +52,7 @@ Before the production deployment, enter these Vercel project environment variabl
 
 | Variable | Value |
 | --- | --- |
-| `NODE_ENV` | `production` |
 | `DEPLOY_TARGET` | `vercel` |
-| `PUBLIC_ORIGIN` | `https://<your-project>.vercel.app` using the actual production domain |
 | `ORACLE_USER` | `TELEMEDICINE_APP` |
 | `ORACLE_PASSWORD` | Dedicated schema password |
 | `ORACLE_CONNECT_STRING` | Full wallet `low` TCPS descriptor |
@@ -61,6 +61,8 @@ Before the production deployment, enter these Vercel project environment variabl
 | `DEMO_PASSWORD_SCRYPT` | Generated `salt:hash` |
 | `SESSION_SECRET` | Generated signing secret |
 | `CRON_SECRET` | Generated cron secret |
+
+Vercel provides `VERCEL_PROJECT_PRODUCTION_URL` for the production domain; the API uses it to check the origin of write requests. Confirm **Automatically expose System Environment Variables** is enabled in the project's environment settings (the default for new projects). If it is disabled, set `PUBLIC_ORIGIN` manually to the exact `https://` production URL and redeploy. The API enforces production authentication whenever it runs on Vercel, so a manual `NODE_ENV` variable is unnecessary.
 
 Keep `VITE_USE_DEMO_DATA=false`; the build command sets this explicitly. Vercel serves static files itself. Redeploy after changing environment variables. Limit sensitive variables to Production unless you intentionally want a protected preview connected to Oracle.
 
