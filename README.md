@@ -12,6 +12,7 @@ This repository contains the complete DA2 implementation, local run instructions
 | Appointments | List joined patient/doctor/department details; book appointments; update appointment status through PL/SQL |
 | Prescriptions | Group medicine rows into prescriptions; calculate item costs; create a prescription and medicine item |
 | Allergy safety | Oracle trigger rejects a medicine when its allergen class matches a recorded patient allergy |
+| Virtual sessions | Oracle trigger creates a placeholder telemedicine session for a newly booked virtual appointment |
 | Laboratory data | APIs return lab orders, catalog information, results, remarks, dates, and document metadata |
 | Telemedicine | API returns session timing, network quality, meeting, and transcript metadata |
 | Billing | Compares stored invoice totals with totals calculated by a PL/SQL function |
@@ -95,6 +96,7 @@ Integrity is enforced with primary keys, composite keys, foreign keys, `NOT NULL
 | `REGISTER_NEW_PATIENT` | Procedure | Creates the next patient ID and inserts a patient |
 | `UPDATE_APPOINTMENT_STATUS` | Procedure | Updates status and raises an error for an unknown appointment |
 | `PREVENT_ALLERGIC_PRESCRIPTION` | Trigger | Rejects an inserted or changed prescription item that conflicts with a recorded allergy |
+| `TRG_CREATE_TELEMEDICINE_SESSION` | Trigger | Creates a placeholder session when a virtual appointment is inserted |
 
 ## 5. REST API contract
 
@@ -137,7 +139,8 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 
 | File | Significance |
 | --- | --- |
-| `telemedicine_ehr.sql` | Destructive, reproducible creation of all 18 tables, constraints, indexes, seed records, sequences, function, procedures, trigger, and verification queries |
+| `telemedicine_ehr.sql` | Destructive, reproducible creation of all 18 tables, constraints, indexes, seed records, sequences, function, procedures, triggers, and verification queries |
+| `telemedicine_session_trigger.sql` | Non-destructive installation of the virtual-session trigger on an existing schema |
 | `da2_upgrade.sql` | Idempotent, non-destructive upgrade for an older local schema; adds allergen metadata and the safety trigger while retaining user-created records |
 | `queries.sql` | Fourteen labelled DA2 SQL demonstrations covering filtering, joins, outer joins, grouping, `HAVING`, subqueries, arithmetic, `LISTAGG`, timestamps, function use, set operations, safety, and all-table counts |
 | `trigger_demo.sql` | Attempts the known Penicillin/Amoxicillin conflict, expects Oracle error `-20002`, and proves that no rejected row persists |
@@ -425,7 +428,7 @@ The host needs a single-page-application fallback that sends unknown frontend pa
 
 ## 15. Scope and security
 
-This is an academic prototype, not a production healthcare system. The recommended student deployment is [Vercel Hobby with Oracle Autonomous Database](deploy/VERCEL.md). The [Oracle VM](deploy/README.md) and [Azure App Service](deploy/AZURE_APP_SERVICE.md) guides describe alternatives. Vercel mode adds a shared demo login, secure session cookie, wallet-based Oracle mTLS, and a daily database keepalive. The application does not provide individual accounts, role-based authorization, audit logging, consent management, or healthcare regulatory compliance. Do not store real patient information.
+This is an academic prototype, not a production healthcare system. The student deployment uses [Vercel Hobby with Oracle Autonomous Database](deploy/VERCEL.md). It has a shared demo login, secure session cookie, wallet-based Oracle mTLS, and a daily database keepalive. The application does not provide individual accounts, role-based authorization, audit logging, consent management, or healthcare regulatory compliance. Do not store real patient information.
 
 ## 16. Short viva explanation
 

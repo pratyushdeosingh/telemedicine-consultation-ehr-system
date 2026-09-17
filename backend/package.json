@@ -10,6 +10,7 @@
     "db:upgrade-da2": "node scripts/runSqlFile.js ../database/da2_upgrade.sql",
     "db:queries": "node scripts/runSqlFile.js ../database/queries.sql",
     "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
+    "db:telemedicine-trigger": "node scripts/runSqlFile.js ../database/telemedicine_session_trigger.sql",
     "auth:generate": "node scripts/generateDemoSecrets.js",
     "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js",
     "test": "npm run check && node --test tests/*.test.js"

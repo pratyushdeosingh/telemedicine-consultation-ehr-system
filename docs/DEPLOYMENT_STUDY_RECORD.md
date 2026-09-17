@@ -21,6 +21,16 @@ Before choosing this path, we considered Azure App Service and an Azure VM. App 
 
 The user downloaded an **instance wallet ZIP** and entered the database-user and wallet passwords privately into `deploy/setup-oracle-local.ps1`. The helper created ignored `backend/.env` and backed up the prior local file. The secrets must stay out of Git, screenshots, reports, and chat.
 
+## Teammate branch reconciliation (17 September 2026)
+
+A fresh fetch found `origin/backend` at `ecf70ff` and `origin/database` at `9243825`. These commits were made from older branch points, so their full trees should not replace the newer deployment branch.
+
+- The backend teammate's API, setup script, and SQL runner were already represented on `main`. The current versions also support Oracle wallets, production login, safer error responses, and Vercel. Taking the older backend files wholesale would remove those protections.
+- The database teammate added `telemedicine_session_trigger.sql`. Its `AFTER INSERT` trigger creates a placeholder `TELEMEDICINE_SESSION` when an appointment's mode is `Virtual`. The trigger has been copied into the combined repository and added to the full schema script; installing it in the already-running Oracle schema is a separate, non-destructive step.
+- Obsolete Azure App Service and Ubuntu VM/Caddy deployment files were removed. The decision history stays in this study record, while `deploy/VERCEL.md` is the active hosting guide.
+
+Before this new trigger is installed, the live Oracle database has one trigger (allergy safety). After installation it should have two. Do not rerun `db:setup` merely to install the new trigger: it drops project tables.
+
 ## Deployment architecture
 
 ```text
@@ -78,6 +88,7 @@ REVOKE RESOURCE FROM TELEMEDICINE_APP;
 ## Still to do
 
 - [ ] Create a Vercel Hobby project from GitHub `main` with the repository root as the Vercel root directory.
+- [ ] Install and test the teammate's virtual-session trigger on the live schema, then revoke temporary `CREATE TRIGGER` again.
 - [ ] Generate and privately store the demo password hash, session secret, and cron secret.
 - [ ] Add the Oracle connection and auth values to **Production** environment variables in Vercel; never use `VITE_` for secrets.
 - [ ] Deploy and verify unauthenticated `401`, login, Oracle-backed reads, a synthetic write, direct-page refresh, and cron logs.

@@ -62,7 +62,7 @@ Before the production deployment, enter these Vercel project environment variabl
 | `SESSION_SECRET` | Generated signing secret |
 | `CRON_SECRET` | Generated cron secret |
 
-Keep `VITE_USE_DEMO_DATA=false`; the build command sets this explicitly. Do not set `SERVE_FRONTEND=true` on Vercel. Vercel serves static files itself. Redeploy after changing environment variables. Limit sensitive variables to Production unless you intentionally want a protected preview connected to Oracle.
+Keep `VITE_USE_DEMO_DATA=false`; the build command sets this explicitly. Vercel serves static files itself. Redeploy after changing environment variables. Limit sensitive variables to Production unless you intentionally want a protected preview connected to Oracle.
 
 ## 4. Verify before sharing
 

@@ -2,8 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors');
-const fs = require('node:fs');
-const path = require('node:path');
 const crypto = require('node:crypto');
 const dbConfig = require('./dbConfig');
 
@@ -13,19 +11,14 @@ const HOST = process.env.HOST || '127.0.0.1';
 const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 const publicOrigin = process.env.PUBLIC_ORIGIN;
-const serveFrontend = process.env.SERVE_FRONTEND === 'true';
-const frontendDist = path.resolve(__dirname, '../frontend/dist');
 const vercelMode = process.env.DEPLOY_TARGET === 'vercel' || Boolean(process.env.VERCEL);
-const authRequired = isProduction && process.env.EXTERNAL_AUTH !== 'true';
+const authRequired = isProduction;
 const authHash = process.env.DEMO_PASSWORD_SCRYPT;
 const sessionSecret = process.env.SESSION_SECRET;
 const sessionMaxAge = 8 * 60 * 60;
 
 if (isProduction && (!publicOrigin || !publicOrigin.startsWith('https://'))) {
     throw new Error('PUBLIC_ORIGIN must be an HTTPS origin in production');
-}
-if (serveFrontend && !fs.existsSync(path.join(frontendDist, 'index.html'))) {
-    throw new Error('Frontend build is missing; build frontend before starting the server');
 }
 if (authRequired && (!authHash || !sessionSecret || sessionSecret.length < 32)) {
     throw new Error('Application authentication configuration is missing');
@@ -134,8 +127,7 @@ function sendValidationError(res, missingFields) {
     });
 }
 
-app.get('/', (req, res, next) => {
-    if (serveFrontend) return next();
+app.get('/', (req, res) => {
     res.json({
         message: 'Telemedicine API is running'
     });
@@ -1095,16 +1087,6 @@ app.put('/api/appointments/:appointment_id/status', async (req, res) => {
         }
     }
 });
-
-if (serveFrontend) {
-    app.use(express.static(frontendDist, { index: false }));
-    app.use((req, res, next) => {
-        if (req.method === 'GET' && !req.path.startsWith('/api') && req.accepts('html')) {
-            return res.sendFile(path.join(frontendDist, 'index.html'));
-        }
-        next();
-    });
-}
 
 app.use((err, req, res, next) => {
     console.error(err);

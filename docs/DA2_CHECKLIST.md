@@ -14,6 +14,8 @@ Deadline: 18 September 2026
 - [x] Create `Register_New_Patient` procedure.
 - [x] Create `Update_Appointment_Status` procedure.
 - [x] Create `Prevent_Allergic_Prescription` trigger.
+- [x] Integrate teammate's `TRG_CREATE_TELEMEDICINE_SESSION` trigger into the reproducible schema.
+- [ ] Install and demonstrate `TRG_CREATE_TELEMEDICINE_SESSION` in the live Always Free database.
 - [x] Reconcile every seeded billing total with the calculation function.
 
 ## SQL evidence

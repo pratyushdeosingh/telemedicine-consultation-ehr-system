@@ -7,6 +7,7 @@ const password = 'synthetic-demo-password';
 const salt = crypto.randomBytes(16);
 process.env.NODE_ENV = 'production';
 process.env.VERCEL = '1';
+process.env.EXTERNAL_AUTH = 'true';
 process.env.PUBLIC_ORIGIN = 'https://demo.vercel.app';
 process.env.ORACLE_USER = 'unused';
 process.env.ORACLE_PASSWORD = 'unused';

@@ -105,6 +105,10 @@ This procedure updates an appointment and raises a controlled application error 
 
 This row-level trigger runs before a medicine is inserted or changed in a prescription item. It resolves the appointment's patient, reads the medicine allergen class and checks the patient's recorded allergies. A match raises Oracle error `-20002`, preventing the unsafe row. The Express transaction then rolls back the prescription header as well.
 
+### `TRG_CREATE_TELEMEDICINE_SESSION`
+
+This teammate-contributed row-level trigger runs after a new `Virtual` appointment is inserted. It creates a placeholder telemedicine session with a generated session ID in the same transaction. A failed appointment transaction also rolls back the session. The separate `database/telemedicine_session_trigger.sql` file installs it on an existing schema without rebuilding tables; live validation evidence must be captured before claiming it passed.
+
 ## 10. Testing summary
 
 | Test | Expected result | Actual result |
