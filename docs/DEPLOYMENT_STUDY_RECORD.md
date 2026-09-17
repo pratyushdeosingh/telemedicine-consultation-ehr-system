@@ -29,7 +29,7 @@ A fresh fetch found `origin/backend` at `ecf70ff` and `origin/database` at `9243
 - The database teammate added `telemedicine_session_trigger.sql`. Its `AFTER INSERT` trigger creates a placeholder `TELEMEDICINE_SESSION` when an appointment's mode is `Virtual`. The trigger was copied into the combined repository, added to the full schema script, and installed on the running Oracle schema with `npm run db:telemedicine-trigger` after a temporary `CREATE TRIGGER` grant.
 - Obsolete Azure App Service and Ubuntu VM/Caddy deployment files were removed. The decision history stays in this study record, while `deploy/VERCEL.md` is the active hosting guide.
 
-The live Oracle trigger was reported `VALID`. A synthetic Virtual appointment created exactly one matching session in the same transaction; the test then rolled back and verified that its appointment was absent. No test appointment was retained. Revoke the temporary `CREATE TRIGGER` grant as `ADMIN` after this installation. Do not rerun `db:setup` merely to install the new trigger: it drops project tables.
+The live Oracle trigger was reported `VALID`. A synthetic Virtual appointment created exactly one matching session in the same transaction; the test then rolled back and verified that its appointment was absent. No test appointment was retained. Afterward, `ADMIN` ran `REVOKE CREATE TRIGGER FROM TELEMEDICINE_APP;` and Oracle displayed **Revoke succeeded** (user screenshot, 17 September 2026). Do not rerun `db:setup` merely to install the new trigger: it drops project tables.
 
 ## Repository cleanup and deployment audit (17 September 2026)
 
@@ -95,7 +95,7 @@ REVOKE RESOURCE FROM TELEMEDICINE_APP;
 
 - [ ] Create a Vercel Hobby project from GitHub `main` with the repository root as the Vercel root directory.
 - [x] Install and test the teammate's virtual-session trigger on the live schema with a rolled-back synthetic appointment.
-- [ ] Confirm that `ADMIN` revoked the temporary `CREATE TRIGGER` privilege again.
+- [x] Confirm that `ADMIN` revoked the temporary `CREATE TRIGGER` privilege again.
 - [ ] Generate and privately store the demo password hash, session secret, and cron secret.
 - [ ] Add the Oracle connection and auth values to **Production** environment variables in Vercel; never use `VITE_` for secrets.
 - [ ] Deploy and verify unauthenticated `401`, login, Oracle-backed reads, a synthetic write, direct-page refresh, and cron logs.
