@@ -26,6 +26,13 @@ Unzip the wallet locally. Copy the full `low` service descriptor from `tnsnames.
 
 Do not send the resulting value or any password in chat. On your own computer, put the schema username, password, descriptor, wallet base64, and wallet password in `backend/.env` (which Git ignores). From `backend/`, run `npm run db:setup` **once in the fresh empty schema**. This script drops existing project tables. Check `npm run db:queries` afterward. Do not rerun setup after keeping records you need.
 
+After setup succeeds, return to Oracle Database Actions SQL as `ADMIN` and revoke the schema-creation privileges from the website account. It retains `CREATE SESSION` and can still read and write its own tables and execute its own stored routines. A future schema migration will require temporarily granting the needed creation privileges again.
+
+```sql
+REVOKE CREATE TABLE, CREATE SEQUENCE, CREATE PROCEDURE, CREATE TRIGGER
+FROM TELEMEDICINE_APP;
+```
+
 On Windows, `deploy/setup-oracle-local.ps1` can create the ignored `backend/.env` from an instance wallet ZIP and two hidden password prompts. It defaults to `Downloads/Wallet_TELEMEHR.zip`; pass `-WalletZip` if your file has another name. It backs up an existing `backend/.env` before replacing it. Run it locally from the repository root, then run `npm run db:setup` from `backend/` on the fresh schema.
 
 ## 2. Demo password
