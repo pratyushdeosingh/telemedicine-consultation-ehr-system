@@ -37,6 +37,7 @@ The live Oracle trigger was reported `VALID`. A synthetic Virtual appointment cr
 - The frontend preview data switch remains for offline course demonstrations and disables writes. The Vercel production build explicitly sets `VITE_USE_DEMO_DATA=false`, so deployed reads use Oracle. The SQL upgrade and trigger demonstration scripts, checklist, and report draft remain because they are reproducible study evidence.
 - The repository is prepared for a Vercel production deployment, but a live Vercel build, environment-variable setup, API smoke test, and cron check have not happened yet. Do not describe the website as deployed or fully verified until those checks pass.
 - At Vercel import, the user selected the GitHub repository on `main`, Hobby, and the repository root (`./`). The root `vercel.json` supplies build/output settings. Before first deployment, the install command was adjusted to include frontend build dependencies even if the environment requests production mode. The API now treats Vercel execution as production and can derive its trusted origin from Vercel's production-domain system variable. `deploy/prepare-vercel-env.js` prepares an ignored, temporary Production-only environment import file from the working local Oracle configuration; it must be deleted after import.
+- The first Vercel deployment of commit `90527b0` reported success, and Vercel's congratulations page preview showed the demo-password screen. The user imported all nine required server-side variable names with **Production** scope and masked values. The public production URL is `https://telemedicine-consultation-ehr-syste.vercel.app/`. Read-only smoke checks found: `/` served HTML with HTTP 200; `/patients` direct navigation served HTML with HTTP 200; `/api/session` returned `{"authenticated":false}`; `/api/patients` returned HTTP 401 without a login; `/api/cron/keepalive` returned HTTP 401 without its secret. A request to `/api/cron/keepalive` with the locally stored cron secret returned HTTP 200 and `{"success":true}`, proving the deployed function connected to Oracle for `SELECT 1`. The user confirmed that browser login succeeded, the website displayed **Oracle connected**, and seeded records appeared. The user also registered one synthetic patient in production and confirmed that it remained visible after a browser refresh, proving an authenticated write persisted. The temporary ignored `.env.vercel-import` file was then deleted locally. Vercel's scheduled cron job still needs confirmation in the dashboard and a scheduled execution log.
 
 ## Deployment architecture
 
@@ -94,12 +95,13 @@ REVOKE RESOURCE FROM TELEMEDICINE_APP;
 
 ## Still to do
 
-- [ ] Create a Vercel Hobby project from GitHub `main` with the repository root as the Vercel root directory.
+- [x] Create a Vercel Hobby project from GitHub `main` with the repository root as the Vercel root directory; first build reported success.
 - [x] Install and test the teammate's virtual-session trigger on the live schema with a rolled-back synthetic appointment.
 - [x] Confirm that `ADMIN` revoked the temporary `CREATE TRIGGER` privilege again.
-- [ ] Generate and privately store the demo password hash, session secret, and cron secret.
-- [ ] Add the Oracle connection and auth values to **Production** environment variables in Vercel; never use `VITE_` for secrets.
-- [ ] Deploy and verify unauthenticated `401`, login, Oracle-backed reads, a synthetic write, direct-page refresh, and cron logs.
+- [x] Generate the demo password hash, session secret, and cron secret locally; keep the demo password private.
+- [x] Import the Oracle connection and auth values as **Production-only** environment variables in Vercel; no `VITE_` secrets.
+- [x] Deploy and verify unauthenticated `401`, login, Oracle-backed reads, a persistent synthetic write, direct-page refresh, and a manually authorized keepalive call.
+- [ ] Confirm the daily keepalive appears in Vercel Cron Jobs and inspect a scheduled execution log after it runs.
 - [ ] Capture sanitized screenshots of the live system and SQL evidence for the report.
 - [ ] Recheck both free-tier usage and database status before the oral exam.
 
