@@ -1,4 +1,9 @@
 export const demoData = {
+  medicalLogs: [{ patient_id: 'PAT-01', patient_name: 'Raman Nathan', log_seq_no: 1, log_date: '2026-09-10', diagnosis: 'Synthetic history entry', attachment_path: null }],
+  allergies: [{ patient_id: 'PAT-01', log_seq_no: 1, allergy_name: 'Penicillin' }],
+  labCatalog: [{ test_catalog_id: 'TEST-DEMO', test_name: 'Demo blood count', category: 'Hematology', standard_cost: 300 }],
+  labOrders: [{ order_id: 'LAB-DEMO', appointment_id: 'APT-01', patient_name: 'Raman Nathan', test_name: 'Demo blood count', order_date: '2026-09-10', priority: 'Routine', standard_cost: 300 }],
+  testResults: [{ order_id: 'LAB-DEMO', result_seq_no: 1, result_value: 'Synthetic result', report_date: '2026-09-11', technician_remarks: 'Preview only', document_url: null }],
   patients: [
     { patient_id: 'PAT-01', first_name: 'Raman', last_name: 'Nathan', city: 'Chennai', state: 'TN', gender: 'Male', policy_no: 'POL-1001' },
     { patient_id: 'PAT-02', first_name: 'Kavitha', last_name: 'Subramanian', city: 'Chennai', state: 'TN', gender: 'Female', policy_no: 'POL-1002' },

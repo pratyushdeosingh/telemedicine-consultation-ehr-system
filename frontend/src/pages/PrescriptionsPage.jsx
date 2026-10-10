@@ -39,6 +39,8 @@ export function PrescriptionsPage() {
   const { data, error, isError, isLoading, reload } = useApiResource(api.getPrescriptions)
   const { data: appointments } = useApiResource(api.getAppointments)
   const { data: medicines } = useApiResource(api.getMedicines)
+  const { data: allergies, isLoading: allergiesLoading, isError: allergiesError, reload: reloadAllergies } = useApiResource(api.getAllergies)
+  const { data: invoices, isLoading: invoicesLoading, isError: invoicesError, reload: reloadInvoices } = useApiResource(api.getBilling)
   const { data: pharmacies } = useApiResource(api.getPharmacies)
   const prescriptions = useMemo(() => {
     const grouped = groupPrescriptions(data)
@@ -50,6 +52,12 @@ export function PrescriptionsPage() {
         .some((value) => value.toLowerCase().includes(normalizedQuery)),
     )
   }, [data, query])
+
+  const selectedAppointment = appointments.find((item) => item.appointment_id === form.appointment_id)
+  const isSettled = invoices.some((invoice) => invoice.appointment_id === form.appointment_id && ['Paid', 'Refunded'].includes(invoice.payment_status))
+  const selectedMedicine = medicines.find((item) => item.medicine_id === form.medicine_id)
+  const patientAllergies = [...new Set(allergies.filter((item) => item.patient_id === selectedAppointment?.patient_id).map((item) => item.allergy_name))]
+  const hasConflict = Boolean(selectedMedicine?.allergen_class && patientAllergies.some((value) => value.trim().toUpperCase() === selectedMedicine.allergen_class.trim().toUpperCase()))
 
   const totalMedicineCost = data.reduce((total, item) => total + (Number(item.medicine_cost) || 0), 0)
 
@@ -103,6 +111,15 @@ export function PrescriptionsPage() {
             <button className="icon-button" type="button" onClick={() => setIsFormOpen(false)} aria-label="Close prescription form"><X size={17} /></button>
           </div>
           <form className="record-form" onSubmit={submitPrescription}>
+            <div className="clinical-notice form-span-2" role="status">
+              <strong>Allergy check</strong>
+              {allergiesLoading ? <p>Loading recorded allergies…</p> : allergiesError ? <p>Allergies could not be loaded. <button type="button" onClick={reloadAllergies}>Retry allergy check</button></p> : <p>{selectedAppointment ? `Recorded allergies: ${patientAllergies.join(', ') || 'None recorded (not confirmation of no allergies)'}` : 'Select an appointment to view patient allergies.'}</p>}
+              {invoicesError && <p>Billing status could not be checked. <button type="button" onClick={reloadInvoices}>Retry billing check</button></p>}
+              {isSettled && <p>This appointment has a paid or refunded invoice. Select a new appointment to add a prescription.</p>}
+              {selectedMedicine?.allergen_class && <p>Recorded medicine allergen class: {selectedMedicine.allergen_class}</p>}
+              {hasConflict && <p className="allergy-conflict">Warning: this medicine matches a recorded allergy. Choose a different medicine.</p>}
+              {selectedMedicine && !selectedMedicine.allergen_class && <p>This medicine has no allergen class recorded; the automatic check cannot identify a class conflict.</p>}
+            </div>
             <label><span>Appointment *</span><select name="appointment_id" value={form.appointment_id} onChange={updateField} required><option value="">Select appointment</option>{appointments.map((appointment) => <option key={appointment.appointment_id} value={appointment.appointment_id}>{appointment.appointment_id} · {appointment.patient_name}</option>)}</select></label>
             <label><span>Prescription number *</span><input name="prescription_no" value={form.prescription_no} onChange={updateField} placeholder="RX-09" required /></label>
             <label><span>Issue date *</span><input type="date" name="issue_date" value={form.issue_date} onChange={updateField} required /></label>
@@ -112,7 +129,7 @@ export function PrescriptionsPage() {
             <label><span>Duration in days *</span><input type="number" min="1" name="duration_days" value={form.duration_days} onChange={updateField} required /></label>
             <label><span>Quantity *</span><input type="number" min="1" name="quantity" value={form.quantity} onChange={updateField} required /></label>
             <label className="form-span-2"><span>Clinical notes</span><textarea name="notes" value={form.notes} onChange={updateField} rows="3" /></label>
-            <div className="form-footer form-span-2"><ActionFeedback feedback={feedback} /><button className="primary-button" type="submit" disabled={isSaving}><Save size={15} /> {isSaving ? 'Saving…' : 'Create prescription'}</button></div>
+            <div className="form-footer form-span-2"><ActionFeedback feedback={feedback} /><button className="primary-button" type="submit" disabled={isSaving || allergiesLoading || allergiesError || invoicesLoading || invoicesError || isSettled}><Save size={15} /> {isSaving ? 'Saving…' : 'Create prescription'}</button></div>
           </form>
         </Surface>
       )}

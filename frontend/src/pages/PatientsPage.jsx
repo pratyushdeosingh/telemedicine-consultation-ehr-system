@@ -1,5 +1,6 @@
 import { MapPin, Plus, Save, ShieldCheck, ShieldX, UsersRound, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { ActionFeedback } from '../components/ActionFeedback.jsx'
 import { EmptyState, ErrorState, LoadingState } from '../components/DataState.jsx'
@@ -93,7 +94,7 @@ export function PatientsPage() {
               return (
                 <article className="patient-row" key={patient.patient_id}>
                   <span className="avatar">{getInitials(fullName)}</span>
-                  <div className="record-primary"><strong>{fullName}</strong><small>{patient.patient_id} · {patient.gender}</small></div>
+                  <div className="record-primary"><strong><Link to={`/medical-history?patient=${encodeURIComponent(patient.patient_id)}`}>{fullName}</Link></strong><small>{patient.patient_id} · {patient.gender}</small></div>
                   <div className="record-detail"><MapPin size={15} /><span><strong>{patient.city}</strong><small>{patient.state}</small></span></div>
                   <StatusBadge tone={patient.policy_no ? 'positive' : 'neutral'}>{patient.policy_no ?? 'Self-pay'}</StatusBadge>
                 </article>

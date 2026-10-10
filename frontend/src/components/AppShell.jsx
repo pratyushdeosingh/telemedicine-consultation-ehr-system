@@ -1,5 +1,7 @@
 import {
   Activity,
+  FlaskConical,
+  ClipboardList,
   CalendarDays,
   CircleDollarSign,
   FileHeart,
@@ -16,6 +18,8 @@ import { ConnectionStatus } from './ConnectionStatus.jsx'
 const navigation = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/patients', label: 'Patients', icon: UsersRound },
+  { to: '/medical-history', label: 'Medical history', icon: ClipboardList },
+  { to: '/laboratory', label: 'Laboratory', icon: FlaskConical },
   { to: '/appointments', label: 'Appointments', icon: CalendarDays },
   { to: '/prescriptions', label: 'Prescriptions', icon: FileHeart },
   { to: '/billing', label: 'Billing', icon: CircleDollarSign },
@@ -114,7 +118,7 @@ export function AppShell({ onLogout }) {
       </section>
 
       <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navigation.slice(0, 5).map((item) => (
+        {navigation.filter((item) => item.to !== '/system-flow').map((item) => (
           <NavigationLink key={item.to} item={item} compact />
         ))}
       </nav>

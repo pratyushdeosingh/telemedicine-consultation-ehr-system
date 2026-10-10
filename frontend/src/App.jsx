@@ -6,6 +6,8 @@ import { LoginScreen } from './components/LoginScreen.jsx'
 import { AppointmentsPage } from './pages/AppointmentsPage.jsx'
 import { BillingPage } from './pages/BillingPage.jsx'
 import { OverviewPage } from './pages/OverviewPage.jsx'
+import { MedicalHistoryPage } from './pages/MedicalHistoryPage.jsx'
+import { LaboratoryPage } from './pages/LaboratoryPage.jsx'
 import { PatientsPage } from './pages/PatientsPage.jsx'
 import { PrescriptionsPage } from './pages/PrescriptionsPage.jsx'
 import { SystemFlowPage } from './pages/SystemFlowPage.jsx'
@@ -43,6 +45,8 @@ export default function App() {
       }} />}>
         <Route path="/" element={<OverviewPage />} />
         <Route path="/patients" element={<PatientsPage />} />
+        <Route path="/medical-history" element={<MedicalHistoryPage />} />
+        <Route path="/laboratory" element={<LaboratoryPage />} />
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/prescriptions" element={<PrescriptionsPage />} />
         <Route path="/billing" element={<BillingPage />} />

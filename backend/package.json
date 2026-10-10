@@ -12,8 +12,9 @@
     "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
     "db:telemedicine-trigger": "node scripts/runSqlFile.js ../database/telemedicine_session_trigger.sql",
     "auth:generate": "node scripts/generateDemoSecrets.js",
-    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js",
-    "test": "npm run check && node --test tests/*.test.js"
+    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js",
+    "test": "npm run check && node --test tests/*.test.js",
+    "db:verify-workflows": "node scripts/verifyClinicalWorkflows.js"
   },
   "keywords": [],
   "author": "",

@@ -13,14 +13,15 @@ This repository contains the complete DA2 implementation, local run instructions
 | Prescriptions | Group medicine rows into prescriptions; calculate item costs; create a prescription and medicine item |
 | Allergy safety | Oracle trigger rejects a medicine when its allergen class matches a recorded patient allergy |
 | Virtual sessions | Oracle trigger creates a placeholder telemedicine session for a newly booked virtual appointment |
-| Laboratory data | APIs return lab orders, catalog information, results, remarks, dates, and document metadata |
+| Laboratory data | Website lists orders/results and creates orders and result entries using catalog reference data |
+| Medical history | Website shows diagnoses and allergies by patient; records a history entry and its allergies together |
 | Telemedicine | API returns session timing, network quality, meeting, and transcript metadata |
-| Billing | Compares stored invoice totals with totals calculated by a PL/SQL function |
+| Billing | Generates invoices, shows current charge breakdowns, recalculates pending totals, records Paid/Refunded status, and reconciles against PL/SQL totals |
 | Dashboard | Summarises patient, appointment, prescription, and billing data |
 | Data states | Loading, empty, error, retry, preview-data, and Oracle-connection states |
 | DA2 evidence | Reproducible schema, 14 SQL demonstrations, trigger proof, checklist, and report draft |
 
-The current web interface has six routes: Overview, Patients, Appointments, Prescriptions, Billing, and System Flow. Laboratory, medical-log, and telemedicine data are available through the backend but do not currently have dedicated frontend pages.
+The web interface includes Overview, Patients, Medical History, Laboratory, Appointments, Prescriptions, Billing, and System Flow. Medical history, allergies, lab orders/results, and invoice actions are implemented. See [D.A. 2 workflow completion](docs/DA2_COMPLETION.md) for the new endpoints, query explanations, business rules, and verification command. Telemedicine sessions remain available through the backend.
 
 ## 2. Architecture and request flow
 
@@ -110,7 +111,7 @@ The API runs at `http://localhost:3000` by default.
 | `GET` | `/api/doctors` | Joins doctors with departments |
 | `GET` | `/api/medicines` | Reads medicine and allergen reference data |
 | `GET` | `/api/pharmacies` | Reads pharmacy reference data |
-| `GET` | `/api/medical-logs` | Joins medical logs with patients and allergies |
+| `GET` | `/api/medical-logs` | Joins medical logs with patients; allergies are available separately at `/api/allergies` |
 | `GET` | `/api/lab-orders` | Joins lab orders, appointments, patients, and test catalog |
 | `GET` | `/api/test-results` | Joins test results to orders, catalog entries, and patients |
 | `GET` | `/api/telemedicine-sessions` | Joins virtual sessions with appointment participants |
@@ -153,7 +154,7 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 | `.env.example` | Names the required Oracle, server-port, and CORS settings without containing secrets |
 | `package.json` | Backend dependencies and start, test, schema, upgrade, query, and trigger-test commands |
 | `package-lock.json` | Locks the exact npm dependency graph for reproducible installation |
-| `server.js` | Express application, all 17 routes, Oracle queries, validation, commit/rollback handling, and response mapping |
+| `server.js` | Express application, authentication, API routes, Oracle queries, validation, commit/rollback handling, and response mapping |
 | `scripts/setupDatabase.js` | Parses and executes the complete destructive schema script; ignores only expected missing-object cleanup errors |
 | `scripts/runSqlFile.js` | Executes a specified SQL/PLSQL evidence file and prints query rows without rebuilding the database |
 | `README.md` | Backend-only setup and API reference |
@@ -176,7 +177,7 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 | File | Significance |
 | --- | --- |
 | `main.jsx` | Mounts React, enables browser routing, and loads global styles |
-| `App.jsx` | Defines the six page routes inside the common application shell and redirects unknown routes |
+| `App.jsx` | Defines the eight page routes inside the common application shell and redirects unknown routes |
 | `index.css` | Complete visual system, responsive layout, forms, tables, states, and reduced-motion handling |
 | `api/client.js` | Central fetch wrapper, endpoint operations, JSON error handling, demo/live switching, and write protection in preview mode |
 | `api/demoData.js` | Synthetic frontend-only records used when the Oracle API is deliberately disabled |
@@ -206,7 +207,9 @@ Generated directories such as `.git`, `node_modules`, and `frontend/dist` are in
 | `PatientsPage.jsx` | Searches patients and submits the registration form |
 | `AppointmentsPage.jsx` | Filters, lists, creates, and updates appointments using doctor and patient reference data |
 | `PrescriptionsPage.jsx` | Groups medicine-level API rows and creates a prescription with its first item |
-| `BillingPage.jsx` | Filters invoices and highlights differences between stored and calculated totals |
+| `BillingPage.jsx` | Generates invoices, shows charge breakdowns, reconciles totals, and records payment/refund status |
+| `MedicalHistoryPage.jsx` | Filters diagnoses and allergies by patient and records new history entries |
+| `LaboratoryPage.jsx` | Lists/searches lab orders/results and provides order/result forms |
 | `SystemFlowPage.jsx` | Explains the application layers and principal API routes for demonstration |
 
 ### `docs/`

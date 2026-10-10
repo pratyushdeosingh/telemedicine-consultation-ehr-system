@@ -4,6 +4,7 @@ const oracledb = require('oracledb');
 const cors = require('cors');
 const crypto = require('node:crypto');
 const dbConfig = require('./dbConfig');
+const { registerClinicalRoutes, lockAppointment } = require('./clinicalRoutes');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -127,6 +128,8 @@ function sendValidationError(res, missingFields) {
         error: `Missing required fields: ${missingFields.join(', ')}`
     });
 }
+
+registerClinicalRoutes(app, oracledb, dbConfig, safeError);
 
 app.get('/', (req, res) => {
     res.json({
@@ -560,7 +563,8 @@ app.get('/api/appointments', async (req, res) => {
                 a.Appointment_Time,
                 a.Status,
                 a.Consultation_Mode,
-                a.Meeting_Link
+                a.Meeting_Link,
+                a.Patient_ID
             FROM APPOINTMENT a
             JOIN PATIENT p
                 ON a.Patient_ID = p.Patient_ID
@@ -580,7 +584,8 @@ app.get('/api/appointments', async (req, res) => {
             appointment_time: row[5],
             status: row[6],
             consultation_mode: row[7],
-            meeting_link: row[8]
+            meeting_link: row[8],
+            patient_id: row[9]
         }));
 
         res.json(appointments);
@@ -900,9 +905,9 @@ app.post('/api/prescriptions', async (req, res) => {
             notes,
             pharmacy_id,
             items
-        } = req.body;
+        } = req.body || {};
 
-        const missingFields = requireFields(req.body, [
+        const missingFields = requireFields(req.body || {}, [
             'appointment_id',
             'prescription_no',
             'issue_date'
@@ -919,13 +924,13 @@ app.post('/api/prescriptions', async (req, res) => {
             });
         }
 
-        const invalidItemIndex = items.findIndex((item) => requireFields(item, [
+        const invalidItemIndex = items.findIndex((item) => !item || typeof item !== 'object' || requireFields(item, [
             'item_seq_no',
             'medicine_id',
             'dosage',
             'duration_days',
             'quantity'
-        ]).length > 0);
+        ]).length > 0 || !['item_seq_no', 'duration_days', 'quantity'].every((key) => Number.isSafeInteger(item[key]) && item[key] > 0));
 
         if (invalidItemIndex !== -1) {
             return res.status(400).json({
@@ -935,6 +940,7 @@ app.post('/api/prescriptions', async (req, res) => {
         }
 
         connection = await oracledb.getConnection(dbConfig);
+        await lockAppointment(connection, appointment_id);
 
         await connection.execute(
             `
@@ -1014,11 +1020,11 @@ app.post('/api/prescriptions', async (req, res) => {
 
         const isAllergyConflict = err.errorNum === 20002;
 
-        res.status(isAllergyConflict ? 409 : 500).json({
+        res.status(isAllergyConflict ? 409 : (err.status || 500)).json({
             success: false,
             error: isAllergyConflict
                 ? 'The selected medicine conflicts with a recorded allergy'
-                : safeError(err)
+                : err.status ? err.message : safeError(err)
         });
 
     } finally {

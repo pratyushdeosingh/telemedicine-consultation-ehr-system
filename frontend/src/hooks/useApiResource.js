@@ -6,7 +6,7 @@ export function useApiResource(loader, initialValue = []) {
   const [error, setError] = useState(null)
 
   const reload = useCallback(async () => {
-    setStatus('loading')
+    setStatus((current) => current === 'success' || current === 'refreshing' ? 'refreshing' : 'loading')
     setError(null)
 
     try {
