@@ -10,7 +10,6 @@ import { MedicalHistoryPage } from './pages/MedicalHistoryPage.jsx'
 import { LaboratoryPage } from './pages/LaboratoryPage.jsx'
 import { PatientsPage } from './pages/PatientsPage.jsx'
 import { PrescriptionsPage } from './pages/PrescriptionsPage.jsx'
-import { SystemFlowPage } from './pages/SystemFlowPage.jsx'
 
 export default function App() {
   const [session, setSession] = useState(isDemoMode ? 'ready' : 'checking')
@@ -50,7 +49,6 @@ export default function App() {
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/prescriptions" element={<PrescriptionsPage />} />
         <Route path="/billing" element={<BillingPage />} />
-        <Route path="/system-flow" element={<SystemFlowPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

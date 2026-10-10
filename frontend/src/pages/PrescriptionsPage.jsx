@@ -97,7 +97,7 @@ export function PrescriptionsPage() {
 
   return (
     <main className="page">
-      <PageHeader eyebrow="Medication" title="A prescription is more than one row." description="Prescription items are grouped through their composite appointment and prescription keys, preserving each medicine and its dosage." />
+      <PageHeader eyebrow="Medication" title="Prescriptions" description="Review prescribed medicines and create prescriptions with recorded-allergy checks." />
       <div className="metric-strip">
         <div><FileHeart size={18} /><span><strong>{groupPrescriptions(data).length}</strong><small>Prescriptions</small></span></div>
         <div><Pill size={18} /><span><strong>{data.length}</strong><small>Medicine items</small></span></div>
@@ -107,7 +107,7 @@ export function PrescriptionsPage() {
       {isFormOpen && (
         <Surface className="action-panel">
           <div className="action-panel-header">
-            <div><strong>Create a prescription</strong><small>Adds a prescription and its first medicine item in one Oracle transaction.</small></div>
+            <div><strong>Create a prescription</strong><small>Select an appointment and enter medicine, dosage, and duration.</small></div>
             <button className="icon-button" type="button" onClick={() => setIsFormOpen(false)} aria-label="Close prescription form"><X size={17} /></button>
           </div>
           <form className="record-form" onSubmit={submitPrescription}>

@@ -1,5 +1,12 @@
 # Documentation
 
-Workflow diagrams, screenshots, demonstration notes, and handwritten-report source material belong here.
+| Document | Purpose |
+| --- | --- |
+| [DA2_COMPLETION.md](DA2_COMPLETION.md) | Current workflow rules, query explanations, verification, and demonstration steps |
+| [DA2_CHECKLIST.md](DA2_CHECKLIST.md) | Database implementation and report-evidence checklist |
+| [DA2_REPORT_DRAFT.md](DA2_REPORT_DRAFT.md) | Technical source material for the handwritten report |
+| [DEPLOYMENT_STUDY_RECORD.md](DEPLOYMENT_STUDY_RECORD.md) | Historical deployment decisions and dated verification evidence |
 
-For the Oracle Cloud and Vercel setup history, security rationale, verification evidence, and oral-exam questions, read [DEPLOYMENT_STUDY_RECORD.md](DEPLOYMENT_STUDY_RECORD.md). Keep that record updated as deployment progresses; never add passwords or wallet contents.
+Use the [project README](../README.md) for current setup and the [Vercel guide](../deploy/VERCEL.md) for deployment. Historical entries describe the state at their recorded date, not necessarily the current application.
+
+Keep passwords, wallet material, and real patient information out of documentation and screenshots.

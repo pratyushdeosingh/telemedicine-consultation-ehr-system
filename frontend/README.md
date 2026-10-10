@@ -1,32 +1,21 @@
-# Care Continuum Frontend
+# Frontend
 
-The React/Vite interface for the Telemedicine Consultation and EHR System.
+React/Vite interface for Care Continuum, with seven pages: Overview, Patients, Medical History, Laboratory, Appointments, Prescriptions, and Billing.
 
-The complete architecture, API contract, setup order, branch workflow, known limitations, troubleshooting notes and viva explanation are maintained in the [project README](../README.md).
+See the [project README](../README.md#run-locally) for full setup. From this directory:
 
-## Start locally
-
-```bash
-pnpm install
-pnpm dev
+```powershell
+corepack pnpm install --frozen-lockfile
+corepack pnpm dev
 ```
 
-Copy `.env.example` to `.env.local` and select a data mode:
+Copy `.env.example` to `.env.local` if that file does not exist. The default configuration calls the real Express API through Vite's `/api` proxy. Set `VITE_USE_DEMO_DATA=true` for a read-only offline preview, then restart Vite.
 
-```env
-VITE_API_URL=/api
-VITE_USE_DEMO_DATA=true
+## Checks
+
+```powershell
+corepack pnpm lint
+corepack pnpm build
 ```
 
-Use `true` for standalone UI preview or `false` to call the Express/Oracle API. Restart Vite after changing environment variables.
-
-In live mode, use **Register patient** on Patients, **Book appointment** or the status controls on Appointments, and **Create prescription** on Prescriptions to write records to Oracle. Write controls intentionally reject requests in preview mode.
-
-## Verify before committing
-
-```bash
-pnpm lint
-pnpm run build
-```
-
-Never commit `.env.local`, API/database credentials, `node_modules` or `dist`.
+Database and authentication credentials belong on the server. Do not place secrets in frontend files or `VITE_` variables.

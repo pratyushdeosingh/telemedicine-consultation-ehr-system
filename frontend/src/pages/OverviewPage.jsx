@@ -1,7 +1,6 @@
 import { ArrowUpRight, CalendarCheck, CircleDollarSign, FileHeart, UsersRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
-import { CareContinuum } from '../components/CareContinuum.jsx'
 import { ErrorState, LoadingState } from '../components/DataState.jsx'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { StatusBadge } from '../components/StatusBadge.jsx'
@@ -20,24 +19,18 @@ export function OverviewPage() {
   const nextAppointments = [...scheduled]
     .sort((first, second) => new Date(first.appointment_date) - new Date(second.appointment_date))
     .slice(0, 4)
-  const counts = {
-    patients: data.patients.length,
-    appointments: data.appointments.length,
-    prescriptions: prescriptionCount,
-    billing: data.billing.length,
-  }
 
   return (
     <main className="page">
-      <PageHeader eyebrow="Care Continuum" title="Care, as one connected system." description="A live operational view across patient identity, consultations, treatment, and billing." />
+      <PageHeader eyebrow="Care Continuum" title="Overview" description="Review scheduled appointments, patient records, prescriptions, and outstanding invoices." />
 
-      {isLoading && <Surface><LoadingState label="Building the clinical overview" /></Surface>}
+      {isLoading && <Surface><LoadingState label="Loading overview" /></Surface>}
       {isError && <Surface><ErrorState error={error} onRetry={reload} /></Surface>}
       {!isLoading && !isError && (
         <>
           <section className="overview-grid">
             <Surface className="pulse-panel">
-              <div className="pulse-copy"><span>Scheduled care</span><strong>{scheduled.length}</strong><small>consultations ready</small></div>
+              <div className="pulse-copy"><span>Scheduled care</span><strong>{scheduled.length}</strong><small>scheduled appointments</small></div>
               <div className="pulse-visual" aria-hidden="true"><span /><span /><span><CalendarCheck size={23} /></span></div>
               <Link to="/appointments">Open schedule <ArrowUpRight size={16} /></Link>
             </Surface>
@@ -49,14 +42,9 @@ export function OverviewPage() {
             </div>
           </section>
 
-          <Surface className="continuum-panel">
-            <header><div><span className="eyebrow">Relational journey</span><h2>One patient. Four connected records.</h2></div><Link to="/system-flow">How data moves <ArrowUpRight size={15} /></Link></header>
-            <CareContinuum counts={counts} />
-          </Surface>
-
           <section className="dashboard-lower-grid">
             <Surface className="upcoming-panel">
-              <header><div><strong>Upcoming consultations</strong><small>Scheduled appointment records</small></div><Link to="/appointments">View all</Link></header>
+              <header><div><strong>Scheduled consultations</strong><small>Scheduled appointment records</small></div><Link to="/appointments">View all</Link></header>
               <div>
                 {nextAppointments.map((appointment) => (
                   <article key={appointment.appointment_id}>
@@ -71,8 +59,8 @@ export function OverviewPage() {
             <Surface className="attention-panel">
               <span className="eyebrow">Needs attention</span>
               <h2>{pendingInvoices.length} invoices are still pending.</h2>
-              <p>The billing API currently reports {formatCurrency(outstanding)} in outstanding stored invoice value.</p>
-              <Link to="/billing">Review reconciliation <ArrowUpRight size={16} /></Link>
+              <p>{formatCurrency(outstanding)} is outstanding across pending invoices.</p>
+              <Link to="/billing">Review invoices <ArrowUpRight size={16} /></Link>
             </Surface>
           </section>
         </>

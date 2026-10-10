@@ -1,7 +1,5 @@
 # DA2 completion and demonstration checklist
 
-Deadline: 18 September 2026
-
 ## Database implementation
 
 - [x] Convert the approved DA1 design into an Oracle relational schema.

@@ -1,438 +1,191 @@
-# Telemedicine Consultation and EHR System
+# Care Continuum
 
-An academic full-stack implementation of a telemedicine and Electronic Health Record workflow. Oracle stores the relational data and PL/SQL business rules, Express exposes the database through JSON APIs, and React renders the dashboard and write forms.
+A telemedicine and electronic health record application built with React, Express, and Oracle Database. The project combines patient records, consultations, prescriptions, laboratory tests, and billing with SQL and PL/SQL business rules.
 
-This repository contains the complete DA2 implementation, local run instructions, database evidence scripts, and report preparation material. It uses synthetic demonstration data only.
+[Live demo](https://telemedicine-consultation-ehr-syste.vercel.app/) · [API reference](backend/README.md) · [Deployment guide](deploy/VERCEL.md)
 
-## 1. Implemented features
+The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete; the planned Cassandra extension for D.A. 3 is not yet implemented.
 
-| Area | Implemented behaviour |
+## Features
+
+| Area | Capabilities |
 | --- | --- |
-| Patients | Search and list patients; register a patient through the Oracle procedure |
-| Appointments | List joined patient/doctor/department details; book appointments; update appointment status through PL/SQL |
-| Prescriptions | Group medicine rows into prescriptions; calculate item costs; create a prescription and medicine item |
-| Allergy safety | Oracle trigger rejects a medicine when its allergen class matches a recorded patient allergy |
-| Virtual sessions | Oracle trigger creates a placeholder telemedicine session for a newly booked virtual appointment |
-| Laboratory data | Website lists orders/results and creates orders and result entries using catalog reference data |
-| Medical history | Website shows diagnoses and allergies by patient; records a history entry and its allergies together |
-| Telemedicine | API returns session timing, network quality, meeting, and transcript metadata |
-| Billing | Generates invoices, shows current charge breakdowns, recalculates pending totals, records Paid/Refunded status, and reconciles against PL/SQL totals |
-| Dashboard | Summarises patient, appointment, prescription, and billing data |
-| Data states | Loading, empty, error, retry, preview-data, and Oracle-connection states |
-| DA2 evidence | Reproducible schema, 14 SQL demonstrations, trigger proof, checklist, and report draft |
+| Patients | Search the directory, register patients, and open their medical history |
+| Medical history | Record dated diagnoses, select known medicine allergy classes, and retain other allergies separately |
+| Appointments | Book virtual or in-person consultations and update appointment status |
+| Prescriptions | Review medicine items, dosage, duration, quantity, and cost; create a prescription with an allergy warning |
+| Laboratory | Search orders and results, order catalog tests, and record result values, remarks, and document references |
+| Billing | Generate invoices, review charge breakdowns, recalculate pending totals, and record Paid or Refunded status |
+| Dashboard | View patient and prescription counts, scheduled consultations, and outstanding invoices |
 
-The web interface includes Overview, Patients, Medical History, Laboratory, Appointments, Prescriptions, Billing, and System Flow. Medical history, allergies, lab orders/results, and invoice actions are implemented. See [D.A. 2 workflow completion](docs/DA2_COMPLETION.md) for the new endpoints, query explanations, business rules, and verification command. Telemedicine sessions remain available through the backend.
+Oracle rejects prescription items whose medicine class matches a recorded patient allergy. Virtual appointment creation also generates a placeholder telemedicine session through a database trigger. Session metadata is available through the API; the application does not host video calls.
 
-## 2. Architecture and request flow
+## Architecture
 
 ```text
-Browser
-  ↓
-React 19 + Vite frontend
-  ↓ fetch('/api/...')
-Vite development proxy
-  ↓
-Express 5 REST API
-  ↓ parameterized SQL / PL/SQL through node-oracledb Thin mode
+React / Vite
+    │ same-origin /api requests
+    ▼
+Express / node-oracledb
+    │ bound SQL and PL/SQL calls
+    ▼
 Oracle Database
 ```
 
-1. A page calls an operation in `frontend/src/api/client.js`.
-2. In local development, Vite forwards `/api` to Express on port `3000`.
-3. Express obtains an Oracle connection, executes SQL or PL/SQL, and maps rows to JSON.
-4. Write routes explicitly commit successful transactions and roll back failures.
-5. `useApiResource` tracks loading, success, error, and retry state.
-6. React renders the returned records. Oracle remains the authoritative data store.
+During local development, Vite proxies `/api` requests to Express on port 3000. On Vercel, the frontend is served as static files and `/api` routes run in a Node.js function connected to Oracle Autonomous Database over wallet-based mTLS.
 
-The Vite proxy is only for local development. In the Vercel deployment, the frontend and Express API share one HTTPS origin and the frontend uses `/api`. See `deploy/VERCEL.md` for the deployment checklist and `docs/DEPLOYMENT_STUDY_RECORD.md` for the dated study record.
+Writes commit after all related statements succeed and roll back on failure. Oracle remains the authoritative data store.
 
-## 3. Technology stack
+## Technology
 
-| Layer | Technology | Project role |
-| --- | --- | --- |
-| Database | Oracle Database | Tables, relationships, constraints, sequences, sample data, SQL, and PL/SQL |
-| Database driver | `node-oracledb` 7 | Executes Oracle SQL and PL/SQL from Node.js in Thin mode |
-| Backend | Node.js + Express 5 | Validation, REST routes, transactions, CORS, and JSON responses |
-| Frontend | React 19 | Routed dashboard pages, forms, filters, and data presentation |
-| Development/build | Vite 8 | Frontend development server, `/api` proxy, and production build |
-| Routing | React Router 7 | Client-side navigation and fallback route |
-| Icons | Lucide React | Interface icons |
-| Frontend checks | Oxlint | JavaScript and React linting |
-
-## 4. Oracle database design
-
-The schema contains exactly 18 project tables.
-
-| Table | Significance |
+| Layer | Stack |
 | --- | --- |
-| `INSURANCE_PROVIDER` | Stores policy provider and coverage-limit master data |
-| `DEPARTMENT` | Stores hospital departments and locations |
-| `PHARMACY` | Stores pharmacies used to dispense prescriptions |
-| `MEDICINE` | Stores medicine, dosage form, price, and allergen classification |
-| `LAB_TEST_CATALOG` | Stores test names, categories, and standard costs |
-| `PATIENT` | Stores patient identity, address, demographics, emergency contact, and optional policy |
-| `DOCTOR` | Stores doctor contact, specialization, and department relationship |
-| `PATIENT_PHONE` | Represents the patient's multivalued phone numbers |
-| `DOCTOR_QUALIFICATION` | Represents the doctor's multivalued qualifications |
-| `MEDICAL_LOG` | Stores sequenced diagnoses and attachment metadata for a patient |
-| `LOG_ALLERGIES` | Stores allergies associated with patient medical logs |
-| `APPOINTMENT` | Connects a patient and doctor for a dated in-person or virtual consultation |
-| `TELEMEDICINE_SESSION` | Stores session timestamps, network state, and transcript metadata for virtual care |
-| `PRESCRIPTION` | Stores the prescription header, pharmacy, issue date, and notes |
-| `PRESCRIPTION_ITEM` | Stores each medicine, dosage, duration, and quantity in a prescription |
-| `LAB_ORDER` | Connects an appointment to an ordered catalog test and priority |
-| `TEST_RESULT` | Stores one or more reported results for a lab order |
-| `BILLING_INVOICE` | Stores invoice totals and payment status for an appointment |
+| Interface | React 19, React Router 7, CSS, Lucide icons |
+| Frontend tooling | Vite 8, pnpm, Oxlint |
+| API | Node.js 24, Express 5 |
+| Database | Oracle Database, SQL, PL/SQL, node-oracledb 7 |
+| Hosting | Vercel and Oracle Autonomous Database |
 
-Integrity is enforced with primary keys, composite keys, foreign keys, `NOT NULL`, `UNIQUE`, and domain `CHECK` constraints. Composition-style children use cascading deletes where appropriate; optional insurance and pharmacy relationships use `ON DELETE SET NULL`. Six indexes support common foreign-key lookups.
+## Repository structure
 
-### PL/SQL and generated identifiers
-
-| Object | Type | Purpose |
-| --- | --- | --- |
-| `SEQ_PATIENT_ID` | Sequence | Generates the numeric portion of new patient IDs |
-| `SEQ_APPOINTMENT_ID` | Sequence | Generates the numeric portion of appointment IDs |
-| `SEQ_INVOICE_ID` | Sequence | Reserved for generated invoice IDs |
-| `CALCULATE_INVOICE_TOTAL` | Function | Adds prescription-item costs and lab catalog costs for an appointment |
-| `REGISTER_NEW_PATIENT` | Procedure | Creates the next patient ID and inserts a patient |
-| `UPDATE_APPOINTMENT_STATUS` | Procedure | Updates status and raises an error for an unknown appointment |
-| `PREVENT_ALLERGIC_PRESCRIPTION` | Trigger | Rejects an inserted or changed prescription item that conflicts with a recorded allergy |
-| `TRG_CREATE_TELEMEDICINE_SESSION` | Trigger | Creates a placeholder session when a virtual appointment is inserted |
-
-## 5. REST API contract
-
-The API runs at `http://localhost:3000` by default.
-
-| Method | Route | Database operation |
-| --- | --- | --- |
-| `GET` | `/` | Confirms that Express is running; does not query Oracle |
-| `GET` | `/api/test-db` | Executes a small Oracle connectivity query |
-| `GET` | `/api/patients` | Reads patients |
-| `GET` | `/api/doctors` | Joins doctors with departments |
-| `GET` | `/api/medicines` | Reads medicine and allergen reference data |
-| `GET` | `/api/pharmacies` | Reads pharmacy reference data |
-| `GET` | `/api/medical-logs` | Joins medical logs with patients; allergies are available separately at `/api/allergies` |
-| `GET` | `/api/lab-orders` | Joins lab orders, appointments, patients, and test catalog |
-| `GET` | `/api/test-results` | Joins test results to orders, catalog entries, and patients |
-| `GET` | `/api/telemedicine-sessions` | Joins virtual sessions with appointment participants |
-| `GET` | `/api/appointments` | Joins appointments with patients, doctors, and departments |
-| `GET` | `/api/prescriptions` | Joins prescription headers, items, medicines, patients, doctors, and pharmacies |
-| `GET` | `/api/billing` | Returns stored totals and `CALCULATE_INVOICE_TOTAL` results |
-| `POST` | `/api/patients` | Calls `REGISTER_NEW_PATIENT` and commits the patient |
-| `POST` | `/api/appointments` | Inserts and commits an appointment |
-| `POST` | `/api/prescriptions` | Inserts one header and its items as a single transaction |
-| `PUT` | `/api/appointments/:appointment_id/status` | Calls `UPDATE_APPOINTMENT_STATUS` and commits the change |
-
-Missing required request fields return HTTP `400`. An allergy conflict returns HTTP `409` and the complete prescription transaction is rolled back. The database health route returns HTTP `503` when required database configuration is missing. Other Oracle failures return HTTP `500`.
-
-## 6. Maintained project files
-
-Generated directories such as `.git`, `node_modules`, and `frontend/dist` are intentionally excluded because they are not maintained source files.
-
-### Repository root
-
-| File | Significance |
-| --- | --- |
-| `README.md` | Authoritative project architecture, inventory, setup, operation, and troubleshooting guide |
-| `.gitignore` | Excludes dependencies, secrets, generated output, logs, editor files, and local Oracle runtime files from Git |
-
-### `database/`
-
-| File | Significance |
-| --- | --- |
-| `telemedicine_ehr.sql` | Destructive, reproducible creation of all 18 tables, constraints, indexes, seed records, sequences, function, procedures, triggers, and verification queries |
-| `telemedicine_session_trigger.sql` | Non-destructive installation of the virtual-session trigger on an existing schema |
-| `da2_upgrade.sql` | Idempotent, non-destructive upgrade for an older local schema; adds allergen metadata and the safety trigger while retaining user-created records |
-| `queries.sql` | Fourteen labelled DA2 SQL demonstrations covering filtering, joins, outer joins, grouping, `HAVING`, subqueries, arithmetic, `LISTAGG`, timestamps, function use, set operations, safety, and all-table counts |
-| `trigger_demo.sql` | Attempts the known Penicillin/Amoxicillin conflict, expects Oracle error `-20002`, and proves that no rejected row persists |
-| `README.md` | Database-specific execution order and warnings |
-
-### `backend/`
-
-| File | Significance |
-| --- | --- |
-| `.env.example` | Names the required Oracle, server-port, and CORS settings without containing secrets |
-| `package.json` | Backend dependencies and start, test, schema, upgrade, query, and trigger-test commands |
-| `package-lock.json` | Locks the exact npm dependency graph for reproducible installation |
-| `server.js` | Express application, authentication, API routes, Oracle queries, validation, commit/rollback handling, and response mapping |
-| `scripts/setupDatabase.js` | Parses and executes the complete destructive schema script; ignores only expected missing-object cleanup errors |
-| `scripts/runSqlFile.js` | Executes a specified SQL/PLSQL evidence file and prints query rows without rebuilding the database |
-| `README.md` | Backend-only setup and API reference |
-
-### `frontend/`
-
-| File | Significance |
-| --- | --- |
-| `.env.example` | Documents the API base URL and preview/live data switch |
-| `.gitignore` | Excludes frontend dependencies, builds, local environment files, logs, and editor metadata |
-| `.oxlintrc.json` | Enables React/Oxc lint plugins, enforces Rules of Hooks, and warns about unsafe component exports |
-| `index.html` | Vite HTML entry document containing the React mount element |
-| `package.json` | Frontend dependencies and development, lint, build, and preview scripts |
-| `pnpm-lock.yaml` | Locks the exact pnpm dependency graph |
-| `vite.config.js` | Enables React and proxies local `/api` requests to Express on port `3000` |
-| `README.md` | Frontend-only startup summary |
-
-### `frontend/src/`
-
-| File | Significance |
-| --- | --- |
-| `main.jsx` | Mounts React, enables browser routing, and loads global styles |
-| `App.jsx` | Defines the eight page routes inside the common application shell and redirects unknown routes |
-| `index.css` | Complete visual system, responsive layout, forms, tables, states, and reduced-motion handling |
-| `api/client.js` | Central fetch wrapper, endpoint operations, JSON error handling, demo/live switching, and write protection in preview mode |
-| `api/demoData.js` | Synthetic frontend-only records used when the Oracle API is deliberately disabled |
-| `hooks/useApiResource.js` | Reusable loading, result, error, unmount-safety, reload, and retry lifecycle |
-| `utils/formatters.js` | Shared date, initials, Indian currency, and status-tone formatting |
-
-### `frontend/src/components/`
-
-| File | Significance |
-| --- | --- |
-| `ActionFeedback.jsx` | Renders success or failure feedback after form actions |
-| `AppShell.jsx` | Provides navigation, responsive sidebar, header, connection status, and nested-page outlet |
-| `CareContinuum.jsx` | Displays patient-to-billing stage counts on the overview |
-| `ConnectionStatus.jsx` | Checks `/api/test-db` and distinguishes preview, checking, connected, and offline states |
-| `DataState.jsx` | Supplies consistent loading, error/retry, and empty-record components |
-| `PageHeader.jsx` | Standard page title, description, eyebrow, and action layout |
-| `SearchField.jsx` | Accessible reusable search input |
-| `SectionPlaceholder.jsx` | Currently unused reusable placeholder for a section that is intentionally unavailable |
-| `StatusBadge.jsx` | Maps semantic status tones to a shared badge presentation |
-| `Surface.jsx` | Shared card/surface wrapper with selectable HTML element |
-
-### `frontend/src/pages/`
-
-| File | Significance |
-| --- | --- |
-| `OverviewPage.jsx` | Loads the four principal resources together and derives dashboard summaries |
-| `PatientsPage.jsx` | Searches patients and submits the registration form |
-| `AppointmentsPage.jsx` | Filters, lists, creates, and updates appointments using doctor and patient reference data |
-| `PrescriptionsPage.jsx` | Groups medicine-level API rows and creates a prescription with its first item |
-| `BillingPage.jsx` | Generates invoices, shows charge breakdowns, reconciles totals, and records payment/refund status |
-| `MedicalHistoryPage.jsx` | Filters diagnoses and allergies by patient and records new history entries |
-| `LaboratoryPage.jsx` | Lists/searches lab orders/results and provides order/result forms |
-| `SystemFlowPage.jsx` | Explains the application layers and principal API routes for demonstration |
-
-### `docs/`
-
-| File | Significance |
-| --- | --- |
-| `DA2_CHECKLIST.md` | Tracks implemented requirements and the remaining screenshot, report, and rehearsal work |
-| `DA2_REPORT_DRAFT.md` | Accurate technical content to transfer into the required handwritten DA2 report |
-| `README.md` | Explains what project evidence belongs in the documentation directory |
-
-## 7. Environment configuration
-
-Never commit `.env`, `.env.local`, passwords, wallets, or connection strings.
-
-### Backend: `backend/.env`
-
-Create it from `backend/.env.example`:
-
-```env
-ORACLE_USER=your_project_schema_user
-ORACLE_PASSWORD=your_password
-ORACLE_CONNECT_STRING=localhost:1521/FREEPDB1
-PORT=3000
-CORS_ORIGIN=http://localhost:5173
+```text
+api/          Vercel function entry point
+backend/      Express routes, Oracle configuration, tests, and verification scripts
+database/     Schema, sample data, upgrades, and SQL/PLSQL evidence
+deploy/       Deployment instructions and local configuration helpers
+docs/         Workflow explanations, report material, and verification history
+frontend/     React application and Vite configuration
+vercel.json   Build commands, API routing, SPA fallback, and keepalive schedule
 ```
 
-`ORACLE_CONNECT_STRING` must match the service configured on the machine. Common local services include `FREEPDB1` and `XEPDB1`; use the actual service rather than copying either value blindly.
-
-### Frontend: `frontend/.env.local`
-
-Live Oracle-backed mode:
-
-```env
-VITE_API_URL=/api
-VITE_USE_DEMO_DATA=false
-```
-
-Frontend-only preview mode:
-
-```env
-VITE_API_URL=/api
-VITE_USE_DEMO_DATA=true
-```
-
-Preview mode never contacts Oracle and deliberately blocks write requests. Restart Vite after changing either variable.
-
-## 8. First-time local setup
+## Run locally
 
 ### Prerequisites
 
-- Git
-- Node.js 20 or newer
-- npm for the backend
-- pnpm through Corepack for the frontend
-- Oracle Database with an accessible pluggable database/service
-- A project schema that is safe to populate
+- Node.js 24 and npm
+- pnpm through Corepack or an existing pnpm installation
+- An accessible Oracle database and a project schema
 
-### 1. Install dependencies
+Run these commands from the repository root using two terminals.
 
-Open PowerShell in the repository root:
+### 1. Configure and start the backend
 
 ```powershell
 cd backend
 npm ci
-
-cd ..\frontend
-corepack enable
-pnpm install
+if (!(Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
 ```
 
-### 2. Create local environment files
+Edit `backend/.env` with your Oracle connection settings:
+
+```dotenv
+ORACLE_USER=your_schema_user
+ORACLE_PASSWORD=your_schema_password
+ORACLE_CONNECT_STRING=localhost:1521/your_service
+PORT=3000
+HOST=127.0.0.1
+CORS_ORIGIN=http://localhost:5173
+```
+
+For Autonomous Database, configure the wallet variables documented in [backend/.env.example](backend/.env.example) and the [deployment guide](deploy/VERCEL.md).
+
+If the schema already exists, start the API directly:
 
 ```powershell
-cd ..\backend
-Copy-Item .env.example .env
-
-cd ..\frontend
-Copy-Item .env.example .env.local
+npm start
 ```
 
-Edit the copied files with the correct local settings. Credentials stay only in `backend/.env`.
-
-### 3. Initialize a new disposable project schema
-
-From `backend/`:
+For a **new, disposable schema only**, initialize the database before starting the API:
 
 ```powershell
 npm run db:setup
 ```
 
-**Warning:** `db:setup` drops and recreates the 18 project tables. Do not run it against a schema containing records you need to retain.
+**`db:setup` drops and recreates the project tables. Do not run it against the deployed database or records you need to retain.** Existing schemas should use only the applicable non-destructive upgrade scripts described in [database/README.md](database/README.md).
 
-For an existing project database created before the allergy-safety enhancement, retain its records with:
+### 2. Configure and start the frontend
 
-```powershell
-npm run db:upgrade-da2
-```
-
-## 9. Starting the complete application
-
-Use two terminals and start the backend before the frontend.
-
-### Terminal 1 — Express and Oracle
-
-```powershell
-cd "path\to\telemedicine-ehr-da2\backend"
-npm start
-```
-
-Expected address: `http://localhost:3000`
-
-Verify:
-
-```powershell
-Invoke-RestMethod http://localhost:3000/
-Invoke-RestMethod http://localhost:3000/api/test-db
-```
-
-The second command must report `Oracle connection successful`.
-
-### Terminal 2 — React and Vite
-
-```powershell
-cd "path\to\telemedicine-ehr-da2\frontend"
-pnpm dev
-```
-
-Open `http://localhost:5173`. In live mode the sidebar badge must say **Oracle connected**.
-
-To stop either development server, focus its terminal and press `Ctrl+C`.
-
-## 10. Database evidence and verification commands
-
-Run from `backend/` after the schema exists:
-
-```powershell
-# Executes all 14 labelled queries and prints their rows
-npm run db:queries
-
-# Proves that the allergy trigger rejects the conflict and persists zero rows
-npm run db:test-trigger
-```
-
-For report screenshots, run `database/queries.sql` one query at a time in SQL Developer and enable DBMS Output before running `database/trigger_demo.sql`.
-
-## 11. Quality checks
-
-Backend:
-
-```powershell
-cd backend
-npm test
-```
-
-Frontend:
+In a second terminal, from the repository root:
 
 ```powershell
 cd frontend
-pnpm lint
-pnpm run build
-pnpm preview
+corepack pnpm install --frozen-lockfile
+if (!(Test-Path -LiteralPath .env.local)) { Copy-Item .env.example .env.local }
+corepack pnpm dev
 ```
 
-Before the final demonstration, test every GET route, one successful write of each supported type, the rejected allergy-conflict prescription, transaction rollback, and invoice reconciliation.
+The default frontend configuration uses the real API:
 
-## 12. DA2 demonstration order
+```dotenv
+VITE_API_URL=/api
+VITE_USE_DEMO_DATA=false
+```
 
-1. Present the DA1 ER diagram and explain its mapping to the 18 tables.
-2. Show keys, constraints, indexes, sequences, and valid PL/SQL objects in Oracle.
-3. Execute selected reports from `database/queries.sql`.
-4. Run `database/trigger_demo.sql` and show that the rejected row count is zero.
-5. Start Express and prove `/api/test-db`.
-6. Start Vite in live mode and confirm **Oracle connected**.
-7. Trace one patient or appointment from Oracle to API JSON to the page.
-8. Create a record on the website and verify it in Oracle.
-9. Attempt the Penicillin/Amoxicillin conflict and explain HTTP `409` plus rollback.
-10. Show zero billing variance.
+Open [localhost:5173](http://localhost:5173). The connection indicator should report **Oracle connected**. Local development does not require the production demo login.
 
-The implementation status and remaining human evidence work are tracked in `docs/DA2_CHECKLIST.md`.
+To preview the interface without Oracle, set `VITE_USE_DEMO_DATA=true` and restart Vite. Preview mode uses synthetic frontend data and rejects write requests.
 
-## 13. Branch workflow
+## Database design
 
-| Branch | Responsibility |
+The Oracle schema contains 18 related tables covering patients, doctors, departments, pharmacies, medicines, medical logs, allergies, appointments, virtual sessions, lab tests, results, insurance, and invoices. Primary keys, foreign keys, check constraints, and indexes enforce and support the relational design.
+
+| PL/SQL object | Purpose |
 | --- | --- |
-| `database` | Original Oracle schema contribution |
-| `backend` | Original Express and Oracle API contribution |
-| `frontend` | Active integration and frontend work branch |
-| `main` | Reviewed integrated project and deployment source |
+| `REGISTER_NEW_PATIENT` | Register a patient with a generated identifier |
+| `UPDATE_APPOINTMENT_STATUS` | Update status and reject unknown appointments |
+| `CALCULATE_INVOICE_TOTAL` | Sum medicine quantities × current unit prices and ordered lab test costs |
+| `PREVENT_ALLERGIC_PRESCRIPTION` | Reject a medicine-class allergy conflict |
+| `TRG_CREATE_TELEMEDICINE_SESSION` | Create a placeholder session for a new virtual appointment |
 
-Continue implementation on `frontend`. After tests and review, fast-forward or merge the approved commit into `main`. Do not rewrite teammate branches. At the time of this README update, `frontend` and `main` contain the same integrated DA2 implementation.
+Patient and appointment identifiers use Oracle sequences. New lab-order and invoice identifiers are generated by the API. Child history/result numbers are allocated under a parent-row lock.
 
-Do not commit `.env`, `.env.local`, Oracle credentials, wallets, `node_modules`, or generated `dist` files.
+The [database guide](database/README.md) explains initialization and upgrades. [queries.sql](database/queries.sql) contains 14 labelled database demonstrations.
 
-## 14. Troubleshooting
+## Verification
 
-### The website says `API offline`
+From `backend/`:
 
-Confirm that Express is running on port `3000`, `backend/.env` contains correct credentials, Oracle is running, `/api/test-db` succeeds directly, and `VITE_USE_DEMO_DATA=false`. Restart Vite after editing environment variables.
+```powershell
+npm test
+npm run db:verify-workflows
+```
 
-### The website says `Preview data`
+`npm test` runs syntax and authentication checks. `db:verify-workflows` requires a working Oracle connection and exercises the real HTTP routes and database rules, including history/allergy validation, prescription rollback, lab operations, and invoice transitions. It rolls back all synthetic test changes.
 
-Set `VITE_USE_DEMO_DATA=false` in `frontend/.env.local` and restart Vite. Preview records are not valid proof of Oracle integration.
+From `frontend/`:
 
-### Oracle returns a connection error
+```powershell
+corepack pnpm lint
+corepack pnpm build
+```
 
-Check the listener, pluggable database state, username, password, host, port, and service name. `FREEPDB1` and `XEPDB1` are examples, not interchangeable defaults.
+Additional database evidence commands are available from `backend/`:
 
-### A write reports an allergy conflict
+```powershell
+npm run db:queries
+npm run db:test-trigger
+```
 
-This is expected when the selected medicine's `Allergen_Class` matches an allergy recorded for the appointment's patient. The database trigger rejects the item and Express rolls back the prescription transaction.
+## Deployment
 
-### Invoice totals differ
+The existing Vercel project is connected to GitHub `main`. A push to that branch triggers a production build. The root [vercel.json](vercel.json) defines the frontend build, API routing, and direct-page fallback.
 
-Compare prescription quantities and unit prices, lab catalog costs, duplicate joins, `CALCULATE_INVOICE_TOTAL`, and the stored invoice. The seeded dataset is expected to have zero variance.
+Configure Oracle credentials, wallet material, the demo-password hash, session secret, and cron secret as server-side Vercel environment variables. Environment-variable changes require a new deployment. SQL scripts are **not** executed by the Vercel build; database migrations must be applied separately.
 
-### A route refresh returns 404 after deployment
+See [deploy/VERCEL.md](deploy/VERCEL.md) for the complete deployment procedure. Keep secrets out of Git and all `VITE_` variables.
 
-The host needs a single-page-application fallback that sends unknown frontend paths to `index.html`. This is separate from the local React Router fallback.
+## Behaviour and limitations
 
-## 15. Scope and security
+- Allergy checking uses exact medicine-class matches, ignoring case and surrounding whitespace. It does not infer ingredients, synonyms, or cross-reactivity. Other allergies are retained for review outside the current automatic match. Missing allergy/class data is not proof of safety.
+- New API-generated invoices are limited to one per appointment. Pending invoices must be explicitly recalculated after charges change; payment is rejected while their totals differ.
+- Paid or refunded appointments reject new prescription and lab charges through the API. Results for existing lab orders can still be recorded.
+- Invoice breakdowns use current catalog prices. Historical price snapshots, partial payments, insurance claims, and payment processing are not implemented.
+- Attachment and report fields store references; file upload and storage are not implemented.
+- Production access uses a shared demo login, not individual accounts or role-based permissions. Use synthetic data only.
 
-This is an academic prototype, not a production healthcare system. The student deployment uses [Vercel Hobby with Oracle Autonomous Database](deploy/VERCEL.md). It has a shared demo login, secure session cookie, wallet-based Oracle mTLS, and a daily database keepalive. The application does not provide individual accounts, role-based authorization, audit logging, consent management, or healthcare regulatory compliance. Do not store real patient information.
+## Documentation
 
-## 16. Short viva explanation
-
-> This is a three-layer telemedicine EHR system. Oracle stores 18 normalized relational tables and enforces integrity and business rules with constraints and PL/SQL. Express exposes parameterized SQL and PL/SQL operations as REST endpoints with explicit commit and rollback handling. React consumes those endpoints to present and update selected healthcare workflows. The database also prevents a medicine from being prescribed when its allergen class conflicts with a patient's recorded allergy, and billing totals are independently recalculated for reconciliation.
+- [Workflow guide](docs/DA2_COMPLETION.md): query explanations, business rules, and demonstration steps
+- [D.A. 2 checklist](docs/DA2_CHECKLIST.md): implementation and report evidence
+- [Report draft](docs/DA2_REPORT_DRAFT.md): source material for the handwritten report
+- [Deployment record](docs/DEPLOYMENT_STUDY_RECORD.md): dated setup decisions and verification history

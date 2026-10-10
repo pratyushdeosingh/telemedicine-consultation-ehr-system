@@ -5,7 +5,6 @@ import {
   CalendarDays,
   CircleDollarSign,
   FileHeart,
-  GitBranch,
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
@@ -23,7 +22,6 @@ const navigation = [
   { to: '/appointments', label: 'Appointments', icon: CalendarDays },
   { to: '/prescriptions', label: 'Prescriptions', icon: FileHeart },
   { to: '/billing', label: 'Billing', icon: CircleDollarSign },
-  { to: '/system-flow', label: 'System flow', icon: GitBranch },
 ]
 
 function NavigationLink({ item, compact = false }) {
@@ -118,7 +116,7 @@ export function AppShell({ onLogout }) {
       </section>
 
       <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navigation.filter((item) => item.to !== '/system-flow').map((item) => (
+        {navigation.map((item) => (
           <NavigationLink key={item.to} item={item} compact />
         ))}
       </nav>

@@ -40,7 +40,7 @@ export function PatientsPage() {
 
     try {
       await api.createPatient({ ...form, policy_no: form.policy_no || null })
-      setFeedback({ type: 'success', message: 'Patient registered in Oracle successfully.' })
+      setFeedback({ type: 'success', message: 'Patient registered successfully.' })
       setForm({ first_name: '', last_name: '', street: '', city: '', state: '', zip_code: '', dob: '', gender: '', emergency_contact: '', policy_no: '' })
       await reload()
     } catch (requestError) {
@@ -52,7 +52,7 @@ export function PatientsPage() {
 
   return (
     <main className="page">
-      <PageHeader eyebrow="Patient directory" title="People behind every record." description="Search patient identity, location, and insurance coverage returned by the Oracle patient endpoint." />
+      <PageHeader eyebrow="Patient directory" title="Patients" description="Search patient records, register a patient, or open their medical history." />
       <div className="metric-strip">
         <div><UsersRound size={18} /><span><strong>{data.length}</strong><small>Total patients</small></span></div>
         <div><ShieldCheck size={18} /><span><strong>{insuredCount}</strong><small>Insured</small></span></div>
@@ -61,7 +61,7 @@ export function PatientsPage() {
       {isFormOpen && (
         <Surface className="action-panel">
           <div className="action-panel-header">
-            <div><strong>Register a patient</strong><small>Creates a new Oracle patient record through the PL/SQL registration procedure.</small></div>
+            <div><strong>Register a patient</strong><small>Enter patient details and emergency contact information.</small></div>
             <button className="icon-button" type="button" onClick={() => setIsFormOpen(false)} aria-label="Close patient form"><X size={17} /></button>
           </div>
           <form className="record-form" onSubmit={submitPatient}>

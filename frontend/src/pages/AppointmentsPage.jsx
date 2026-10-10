@@ -78,7 +78,7 @@ export function AppointmentsPage() {
 
   return (
     <main className="page">
-      <PageHeader eyebrow="Care schedule" title="Every consultation, in sequence." description="A timeline of appointments joined with patient, doctor, and department records." />
+      <PageHeader eyebrow="Care schedule" title="Appointments" description="Book consultations and manage appointment status." />
       <div className="metric-strip">
         <div><CalendarDays size={18} /><span><strong>{data.length}</strong><small>Appointments</small></span></div>
         <div><MonitorUp size={18} /><span><strong>{virtualCount}</strong><small>Virtual</small></span></div>
