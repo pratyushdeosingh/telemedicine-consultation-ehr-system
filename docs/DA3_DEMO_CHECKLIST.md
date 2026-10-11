@@ -17,6 +17,8 @@
 - [x] Thirteen backend tests pass; frontend source lint and production build pass.
 - [x] Backend/root dependency audit reports no known production vulnerabilities.
 - [x] Final hosted database connection, data import, and Vercel production verification.
+- [x] Dedicated Cassandra page and independent database availability indicators.
+- [x] Website refresh, repeated import, partial-result tests, and disabled/recovery browser checks.
 - [ ] Handwritten report, sanitized screenshots, and team rehearsal.
 
 The import counts describe the tested snapshot, not a permanent expected number. Newly added Oracle records increase the count after another import.
@@ -32,7 +34,7 @@ The import counts describe the tested snapshot, not a permanent expected number.
 7. Explain why an Oracle change needs another import before it appears in Cassandra.
 8. Show `npm run timeline:verify -- --outage` results: timeline fails gracefully, Oracle works, then Cassandra recovers.
 9. Explain Oracle versus Cassandra using `DA3_COMPARISON.md`.
-10. Demonstrate the hosted timeline only after cloud deployment is actually verified.
+10. Demonstrate the verified hosted timeline and its Refresh from Oracle button.
 
 CRUD teaching rows are disposable demo records. Do not use direct Cassandra update/delete examples to edit imported clinical records, whose source remains Oracle.
 

@@ -87,7 +87,7 @@ The new real HTTP verifier inserted one uniquely marked disposable Oracle histor
 
 Browser checks confirmed a 55-record refresh result, five PAT-01 September entries, month selection preserved in the URL, December's empty state, and the medical-history link. A controlled local `CASSANDRA_ENABLED=false` run showed Oracle connected and Cassandra not configured. Refresh displayed the failure; restoring configuration and clicking Retry completed the import and restored both connected indicators. The 390-pixel phone layout fits all eight navigation items without horizontal overflow. Original Oracle workflow regressions passed with test writes rolled back.
 
-Local browser evidence is stored in `screenshots/da3-refresh-local.png`. Production verification of this enhancement follows the deployment.
+Local browser evidence is stored in `screenshots/da3-refresh-local.png`. Vercel automatically deployed commit `8a5513a` as deployment `zGZqDC2beoSKe1oJk8WJDZCtWK62`, which reached Ready. Two authenticated website refreshes each completed with 55 targeted/written events, 18 source partitions, and zero failures. The selected PAT-01 September timeline retained five records. Unauthenticated patient/health/timeline reads and refresh POSTs returned 401; a foreign-origin refresh returned 403. Nine laboratory orders/results and eight invoices with existing status/recalculate controls loaded, and medical history remained available. Production evidence is stored in `screenshots/da3-refresh-production.png`.
 
 ## Remaining academic deliverables
 

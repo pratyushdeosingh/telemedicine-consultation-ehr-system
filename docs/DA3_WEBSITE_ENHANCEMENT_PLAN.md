@@ -1,6 +1,6 @@
 # D.A. 3 website enhancement plan
 
-Status: implemented and verified locally on 11 October 2026. Thirteen backend tests, real Oracle/Astra refresh with a disposable fixture, repeated refresh, independent disabled/recovery states, desktop/mobile layouts, frontend lint/build, and Oracle regressions passed. Production rollout and final browser checks follow before this change is marked deployed.
+Status: implemented, tested, and deployed on 11 October 2026. Thirteen backend tests, real Oracle/Astra refresh with a disposable fixture, repeated refresh, independent disabled/recovery states, desktop/mobile layouts, frontend lint/build, and Oracle regressions passed. Vercel deployed commit `8a5513a`; two live refreshes completed with 55 records and zero failures, and the selected September timeline retained five events. Production authentication/origin checks and Oracle laboratory, billing, and history reads passed.
 
 ## Intended experience
 
