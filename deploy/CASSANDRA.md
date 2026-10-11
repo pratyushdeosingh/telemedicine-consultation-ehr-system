@@ -56,11 +56,15 @@ This creates ignored `.env.cassandra-vercel-import` with four server-side keys:
 | `CASSANDRA_TOKEN` | Scoped application token |
 | `CASSANDRA_SECURE_BUNDLE_B64` | Encoded connection bundle |
 
-Import those keys into Vercel **Production**, retaining all existing Oracle/authentication settings, then delete the temporary import file. For runtime-only access, a separately scoped read-only token can replace `CASSANDRA_TOKEN` in Vercel while the local import token retains write permission.
+Import those keys into Vercel **Production**, retaining all existing Oracle/authentication settings, then delete the temporary import file. The website's **Refresh from Oracle** button requires the scoped token's table read/write permissions. A read-only runtime token would allow viewing but cannot support this button.
 
 The function reconstructs the bundle in its temporary directory and reuses a driver client. No credentials enter frontend code or `VITE_` variables. Missing Cassandra configuration produces a timeline-only unavailable state; it does not prevent the Oracle application from starting.
 
-Merge the verified D.A. 3 branch into `main` only when the hosted release is ready. Vercel builds the code; it does not create the Cassandra table or execute the import. Import source data separately, then verify authenticated timeline reads, paging, direct-page refreshes, and existing Oracle workflows in production.
+Vercel builds after changes are pushed to `main`; deployment itself does not create the table or import records. Once the table exists, use **Cassandra Timeline → Refresh from Oracle** to refresh data from the website. The protected POST route runs within the request, returns complete/partial counts, and reloads the selected timeline. The CLI remains available for maintenance.
+
+The website has a 2,000-row limit per Oracle source query and a 2,000-event limit after mapping. A 120-second budget stops dispatching further Cassandra writes; in-flight queries are awaited. The function's `maxDuration` is set to 180 seconds. The existing Fluid Compute configuration permits that duration on Hobby; see [Vercel's duration documentation](https://vercel.com/docs/functions/configuring-functions/duration). Do not disable Fluid Compute without reviewing its different legacy limits. No plan upgrade is required by this setting.
+
+Authentication and production origin checks protect refresh. Overlap is rejected inside one backend instance, not across multiple scaled instances. Prepared upserts use stable keys, partial writes remain retryable, and source deletions/date changes are not reconciled automatically. Check both availability and the displayed refresh outcome before the presentation.
 
 ## Free-plan limits and fallback
 

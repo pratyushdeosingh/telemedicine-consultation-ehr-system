@@ -77,6 +77,18 @@ The verified branch was fast-forwarded to `main` and pushed at commit `197cdcb`.
 
 The final Oracle workflow regression again passed, including the real allergy conflict/rollback and billing protections; all verification writes were rolled back. Production verification used reads only. Cloud API paging was tested through the local backend connected to Astra; the browser smoke test checked production timeline reads and month behavior.
 
+## Website refresh enhancement verification (11 October 2026)
+
+The dedicated Cassandra Timeline route, desktop/mobile navigation, separate Oracle/Cassandra indicators, patient-specific medical-history link, and Refresh from Oracle button are implemented. The HTTP endpoint shares import orchestration with the CLI, keeps the shared Cassandra client alive, closes its read-only Oracle snapshot, limits website datasets, bounds dispatch time, and reports partial completion honestly.
+
+Thirteen backend tests passed, including import authentication/origin checks, source truncation rejection, deadlines, constrained write concurrency, instance overlap rejection, and sanitized partial/unavailable outcomes. Frontend lint and production build passed. Real source-parity and paging verification again confirmed the 55-event, 18-partition snapshot.
+
+The new real HTTP verifier inserted one uniquely marked disposable Oracle history entry. Before refresh it was absent in Cassandra; refresh imported 56 source events including the fixture. Repeated refresh did not create duplicates. The verifier removed its fixture from both Oracle and Cassandra, restoring the 55-event snapshot. No existing demonstration record was changed by that verifier.
+
+Browser checks confirmed a 55-record refresh result, five PAT-01 September entries, month selection preserved in the URL, December's empty state, and the medical-history link. A controlled local `CASSANDRA_ENABLED=false` run showed Oracle connected and Cassandra not configured. Refresh displayed the failure; restoring configuration and clicking Retry completed the import and restored both connected indicators. The 390-pixel phone layout fits all eight navigation items without horizontal overflow. Original Oracle workflow regressions passed with test writes rolled back.
+
+Local browser evidence is stored in `screenshots/da3-refresh-local.png`. Production verification of this enhancement follows the deployment.
+
 ## Remaining academic deliverables
 
 The handwritten report and demonstration rehearsal remain student work. Multi-node replication/scale demonstrations require a separate confirmed requirement and have not been claimed as tested.

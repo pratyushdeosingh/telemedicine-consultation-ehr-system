@@ -43,6 +43,7 @@ export function useApiResource(loader, initialValue = []) {
     data,
     error,
     isLoading: status === 'loading',
+    isRefreshing: status === 'refreshing',
     isError: status === 'error',
     reload,
   }

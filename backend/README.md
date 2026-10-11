@@ -27,6 +27,7 @@ All routes below use the `/api` prefix. Production data routes require a signed 
 | GET | `/test-results` | List reported results |
 | GET | `/telemedicine-sessions` | List virtual-session metadata |
 | GET | `/timeline/health` | Check timeline configuration and Cassandra access |
+| POST | `/timeline/import` | Refresh all patients from a read-only Oracle snapshot; 200 complete, 207 partial, 409 instance busy, 413 dataset limit, 408 source-read budget, 503 unavailable |
 | GET | `/timeline/:patient_id?month=YYYY-MM` | Read a Cassandra partition; optional `limit` and signed `cursor` |
 | GET | `/billing` | List stored and calculated invoice totals |
 | GET | `/billing/:appointment_id/items` | List current medicine and lab charges |
@@ -74,3 +75,7 @@ The workflow check requires Oracle and uses a temporary server with rolled-back 
 ## Cassandra commands
 
 `npm run timeline:setup` creates the table in an existing keyspace. `npm run timeline:import` reads Oracle and upserts timeline records. `npm run timeline:verify` checks both databases and paging; add `-- --outage` only for local Docker failure/recovery verification. See [cloud setup](../deploy/CASSANDRA.md) and the [comparison](../docs/DA3_COMPARISON.md).
+
+Normal users refresh from the Cassandra Timeline page. The protected POST endpoint uses `timelineRefresh.js`, shared with the CLI, and returns `attempted` (the source events targeted), `written`, `failed`, `status`, `partitions`, and `completed_at`, plus `timed_out` when its write budget expires. It keeps the shared Cassandra client alive and closes its Oracle snapshot connection. No schema creation runs through the website. No failed source read writes to Cassandra. Completion does not remove stale rows after source deletion/date changes.
+
+`npm run timeline:verify-refresh` checks the real HTTP refresh with a uniquely marked temporary Oracle history record, verifies repeated refreshes, and removes that record from both databases. This verifier deliberately commits its disposable fixture so a separate read-only snapshot can see it; existing records are retained. Do not run it concurrently with another import. Unit tests cover source limits, concurrency, deadlines, and partial outcomes.

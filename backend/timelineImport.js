@@ -33,22 +33,33 @@ const queries = {
         JOIN PATIENT p ON p.Patient_ID = a.Patient_ID`,
 };
 
-async function readSource(connection) {
+async function readSource(connection, { maxRows, deadline = Infinity } = {}) {
     await connection.execute('SET TRANSACTION READ ONLY');
     const source = {};
     for (const [name, sql] of Object.entries(queries)) {
-        source[name] = (await connection.execute(sql, [], { outFormat: oracle.OUT_FORMAT_OBJECT })).rows;
+        if (Date.now() >= deadline) throw Object.assign(new Error('Refresh time limit reached. Retry the refresh.'), { status: 408 });
+        source[name] = (await connection.execute(sql, [], { outFormat: oracle.OUT_FORMAT_OBJECT, ...(Number.isFinite(maxRows) ? { maxRows: maxRows + 1 } : {}) })).rows;
+        if (maxRows && source[name].length > maxRows) throw Object.assign(new Error('This dataset exceeds the website refresh limit. Use the maintenance import.'), { status: 413 });
     }
     return source;
 }
 
-async function importEvents(client, events) {
+async function importEvents(client, events, { concurrency = 1, deadline = Infinity } = {}) {
     const query = `INSERT INTO ${config.keyspace()}.clinical_events_by_patient_month
         (patient_id, event_month, event_time, event_id, event_type, patient_name, appointment_id, summary, source_record_id)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const failures = [];
     let written = 0;
-    for (const event of events) {
+    let next = 0;
+    let timedOut = false;
+    async function worker() {
+      while (next < events.length) {
+        const event = events[next++];
+        if (Date.now() >= deadline) {
+            timedOut = true;
+            failures.push({ patient_id: event.patient_id, event_id: event.event_id });
+            continue;
+        }
         try {
             await client.execute(query, [event.patient_id, event.event_month, event.event_time, event.event_id,
                 event.event_type, event.patient_name, event.appointment_id, event.summary, event.source_record_id], { prepare: true });
@@ -58,7 +69,9 @@ async function importEvents(client, events) {
             failures.push({ patient_id: event.patient_id, event_id: event.event_id });
         }
     }
-    return { attempted: events.length, written, failed: failures.length, failures };
+      }
+    await Promise.all(Array.from({ length: Math.min(concurrency, events.length) }, worker));
+    return { attempted: events.length, written, failed: failures.length, failures, ...(timedOut ? { timed_out: true } : {}) };
 }
 
 module.exports = { queries, readSource, importEvents, mapSourceRecords };

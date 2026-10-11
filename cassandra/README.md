@@ -48,10 +48,10 @@ docker compose -f cassandra/compose.yaml exec -T cassandra cqlsh -f /tmp/da3-que
 | `patient_id`, `event_month` | Combined partition key: one patient's records for one month |
 | `event_time` | First clustering column: sorts events newest first |
 | `event_id` | Second clustering column: distinguishes events with the same date/time |
-| `event_type`, `summary` | Information rendered in the future timeline |
+| `event_type`, `summary` | Information rendered in the website timeline |
 | `source_record_id`, `appointment_id` | References to an eventual Oracle source record |
 
-The eight seed records cover two synthetic patients and three patient/month partitions. They are not imported from Oracle. Timestamps use explicit UTC values in this teaching dataset; source-calendar handling will be addressed in the import stage.
+The eight seed records cover two synthetic patients and three patient/month partitions. They are not imported from Oracle. Timestamps use explicit UTC values in this teaching dataset; imported Oracle calendar dates are mapped to UTC midnight to retain their source month.
 
 `care_continuum` is the keyspace, or namespace, containing the table. Its local replication factor is one because this setup has one node. It does not demonstrate replicated failover or scale-out.
 
@@ -78,6 +78,6 @@ Stopping preserves the data. `docker compose down` also preserves the named volu
 
 With the backend's local Cassandra settings enabled, run `npm run timeline:import` from `backend/` to import Oracle records. `npm run timeline:verify` checks source parity and paging; `npm run timeline:verify -- --outage` also verifies that stopping Cassandra does not break Oracle reads.
 
-The Medical History page now includes the timeline. Select a patient and month (for example, PAT-01 and September 2026). The View timeline button re-reads Cassandra; it does not trigger an import.
+Open **Cassandra Timeline** and select a patient/month (for example, PAT-01 and September 2026). **View timeline** reads Cassandra. **Refresh from Oracle** copies new and updated Oracle records for all patients, then reloads the selected timeline. Medical history includes a patient-specific link to this page.
 
 The hosted site uses the verified Astra DB Free connection; see [the cloud guide](../deploy/CASSANDRA.md). Local demonstrations can use this persistent Apache Cassandra container. Vercel connects to Astra rather than the laptop-local container.

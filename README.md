@@ -11,7 +11,8 @@ The deployed application requires a shared demo password and uses synthetic reco
 | Area | Capabilities |
 | --- | --- |
 | Patients | Search the directory, register patients, and open their medical history |
-| Medical history | Record diagnoses/allergies and browse an imported Cassandra timeline by patient and month |
+| Medical history | Record diagnoses/allergies and open the selected patient's Cassandra timeline |
+| Cassandra Timeline | Dedicated D.A. 3 page, patient/month reads, independent connection status, and Refresh from Oracle |
 | Appointments | Book virtual or in-person consultations and update appointment status |
 | Prescriptions | Review medicine items, dosage, duration, quantity, and cost; create a prescription with an allergy warning |
 | Laboratory | Search orders and results, order catalog tests, and record result values, remarks, and document references |
@@ -122,7 +123,7 @@ VITE_API_URL=/api
 VITE_USE_DEMO_DATA=false
 ```
 
-Open [localhost:5173](http://localhost:5173). The connection indicator should report **Oracle connected**. Local development does not require the production demo login.
+Open [localhost:5173](http://localhost:5173). Independent indicators show Oracle and Cassandra availability. Cassandra needs its optional configuration enabled; local development does not require the production demo login.
 
 To preview the interface without Oracle, set `VITE_USE_DEMO_DATA=true` and restart Vite. Preview mode uses synthetic frontend data and rejects write requests.
 
@@ -177,7 +178,11 @@ npm run timeline:import
 npm run timeline:verify
 ```
 
-The import reads Oracle without modifying its data, writes stable Cassandra keys, and reports partial failures. Re-run it after Oracle changes. Open Medical History, select a patient, and choose a month. The timeline is read from Cassandra, with paging, empty states, and isolated connection errors.
+Open **Cassandra Timeline**, choose a patient/month, and click **Refresh from Oracle** after adding or changing Oracle records. The button reads Oracle without modifying it and refreshes Cassandra for all patients. It reports completed/partial results, reloads the selected timeline, and rechecks both connections. The terminal importer remains available for maintenance.
+
+Website refresh is limited to 2,000 rows per source query and 2,000 mapped events, with a 120-second processing budget and four concurrent prepared writes. It stops dispatching new writes after that budget and waits for in-flight queries. The deployed function has a 180-second limit. Overlap is rejected within one backend instance; this guard does not coordinate separate Vercel instances. Partial writes remain and can be retried safely.
+
+For explanations, example queries, report structure, and rehearsal steps, start with the [D.A. 3 study guide](docs/DA3_STUDY_GUIDE.md).
 
 The timeline is a dated record snapshot, not an immutable audit log or a source for allergy/billing decisions. Source deletion or date changes can leave stale timeline rows; automatic reconciliation is not implemented.
 

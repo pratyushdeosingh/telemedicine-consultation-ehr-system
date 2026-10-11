@@ -495,7 +495,7 @@ a { color: inherit; text-decoration: none; }
     bottom: 0.75rem;
     left: 0.75rem;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     padding: 0.45rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 1.25rem;
@@ -516,8 +516,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 480px) {
-  .connection-chip span:last-child { display: none; }
-  .connection-chip { width: 2.25rem; justify-content: center; padding: 0; }
+  .topbar { flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem 1rem; }
+  .topbar-actions { flex-wrap: wrap; justify-content: flex-start; gap: 0.45rem; }
+  .topbar > div:first-child { padding-right: 5rem; }
+  .topbar .logout-button { position: absolute; top: 0.6rem; right: 1rem; padding: 0.35rem 0.5rem; font-size: 0.72rem; }
+  .connection-chip { justify-content: center; padding: 0.4rem 0.55rem; font-size: 0.72rem; }
   .metric-strip { grid-template-columns: 1fr; }
   .metric-strip > div { min-height: 4.25rem; }
   .surface-toolbar { align-items: stretch; flex-direction: column; }
@@ -539,6 +542,8 @@ a { color: inherit; text-decoration: none; }
   .overview-metric:first-child { grid-row: auto; }
   .pulse-visual { right: -1rem; opacity: 0.72; }
 }
+
+.timeline-link { align-self: flex-start; text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }

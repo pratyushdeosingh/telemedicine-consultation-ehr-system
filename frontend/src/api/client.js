@@ -52,6 +52,8 @@ export const api = {
   }),
   logout: () => request('/logout', { method: 'POST' }),
   testConnection: () => isDemoMode ? Promise.resolve({ success: true }) : request('/test-db'),
+  testCassandraConnection: () => isDemoMode ? Promise.resolve({ enabled: false, connected: false }) : request('/timeline/health'),
+  refreshTimeline: () => sendJson('/timeline/import', 'POST', {}),
   getPatients: () => isDemoMode ? Promise.resolve(demoData.patients) : request('/patients'),
   getAppointments: () => isDemoMode ? Promise.resolve(demoData.appointments) : request('/appointments'),
   getPrescriptions: () => isDemoMode ? Promise.resolve(demoData.prescriptions) : request('/prescriptions'),

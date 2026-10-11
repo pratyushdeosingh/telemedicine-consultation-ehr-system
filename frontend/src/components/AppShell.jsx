@@ -9,6 +9,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   UsersRound,
+  Database,
 } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
@@ -18,6 +19,7 @@ const navigation = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/patients', label: 'Patients', icon: UsersRound },
   { to: '/medical-history', label: 'Medical history', icon: ClipboardList },
+  { to: '/cassandra-timeline', label: 'Cassandra Timeline', icon: Database },
   { to: '/laboratory', label: 'Laboratory', icon: FlaskConical },
   { to: '/appointments', label: 'Appointments', icon: CalendarDays },
   { to: '/prescriptions', label: 'Prescriptions', icon: FileHeart },
@@ -107,6 +109,7 @@ export function AppShell({ onLogout }) {
           <div className="topbar-actions">
             <span className="date-chip">{today}</span>
             <ConnectionStatus />
+            <ConnectionStatus database="Cassandra" />
             <button className="logout-button" type="button" onClick={onLogout}>Sign out</button>
           </div>
         </header>

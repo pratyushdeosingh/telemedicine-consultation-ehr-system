@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const config = require('./cassandraConfig');
 const { validatePartition } = require('./timelineModel');
+const { refreshTimeline } = require('./timelineRefresh');
 
 const cursorSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
@@ -25,6 +26,16 @@ function readCursor(cursor, patient, month, limit) {
 function registerTimelineRoutes(app, dependencies = {}) {
     const getClient = dependencies.getClient || config.getClient;
     const isEnabled = dependencies.enabled || config.enabled;
+    app.post('/api/timeline/import', async (req, res) => {
+        if (!isEnabled()) return res.status(503).json({ error: 'Cassandra is not configured. Oracle records remain available.' });
+        try {
+            const result = await (dependencies.refreshTimeline || refreshTimeline)();
+            res.status(result.failed ? 207 : 200).json(result);
+        } catch (error) {
+            const expected = [409, 413, 408].includes(error.status);
+            res.status(expected ? error.status : 503).json({ error: expected ? error.message : 'Refresh could not complete. Check both database connections and retry. Some Cassandra records may have been updated; retrying is safe.' });
+        }
+    });
     app.get('/api/timeline/health', async (req, res) => {
         if (!isEnabled()) return res.json({ enabled: false, connected: false });
         try {

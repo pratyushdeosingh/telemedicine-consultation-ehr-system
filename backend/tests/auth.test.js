@@ -31,6 +31,8 @@ test('demo API requires login and rejects a foreign origin', async () => {
         for (const route of ['/api/timeline/health', '/api/timeline/PAT-01?month=2026-09']) {
             assert.equal((await fetch(base + route)).status, 401);
         }
+        assert.equal((await fetch(base + '/api/timeline/import', { method: 'POST', headers: { Origin: 'https://demo.vercel.app' } })).status, 401);
+        assert.equal((await fetch(base + '/api/timeline/import', { method: 'POST', headers: { Origin: 'https://elsewhere.example' } })).status, 403);
 
         const foreign = await fetch(`${base}/api/login`, {
             method: 'POST',

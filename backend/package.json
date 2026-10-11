@@ -12,12 +12,13 @@
     "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
     "db:telemedicine-trigger": "node scripts/runSqlFile.js ../database/telemedicine_session_trigger.sql",
     "auth:generate": "node scripts/generateDemoSecrets.js",
-    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js && node --check cassandraConfig.js && node --check timelineModel.js && node --check timelineImport.js && node --check timelineRoutes.js && node --check scripts/importTimeline.js && node --check scripts/verifyTimeline.js && node --check scripts/setupTimeline.js",
+    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js && node --check cassandraConfig.js && node --check timelineModel.js && node --check timelineImport.js && node --check timelineRoutes.js && node --check scripts/importTimeline.js && node --check scripts/verifyTimeline.js && node --check scripts/setupTimeline.js && node --check timelineRefresh.js && node --check scripts/verifyWebsiteRefresh.js",
     "test": "npm run check && node --test tests/*.test.js",
     "db:verify-workflows": "node scripts/verifyClinicalWorkflows.js",
     "timeline:import": "node scripts/importTimeline.js",
     "timeline:verify": "node scripts/verifyTimeline.js",
-    "timeline:setup": "node scripts/setupTimeline.js"
+    "timeline:setup": "node scripts/setupTimeline.js",
+    "timeline:verify-refresh": "node scripts/verifyWebsiteRefresh.js"
   },
   "keywords": [],
   "author": "",

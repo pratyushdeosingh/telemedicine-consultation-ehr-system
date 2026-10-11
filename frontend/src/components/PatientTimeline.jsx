@@ -51,7 +51,7 @@ function TimelineRecords({ patientId, month }) {
   return <>
     {loading && <LoadingState label={events.length ? 'Loading more timeline records' : 'Loading Cassandra timeline'} />}
     {error && <ErrorState error={error} onRetry={restart} />}
-    {!loading && !error && !events.length && <EmptyState title="No imported records for this month" message="Choose another month, or run the Oracle-to-Cassandra import after records change." />}
+    {!loading && !error && !events.length && <EmptyState title="No imported records for this month" message="Choose another month, or use Refresh from Oracle after records change." />}
     <div className="clinical-list">{events.map((event) => <article className="clinical-card" key={`${event.event_time}:${event.event_id}`}>
       <header><strong>{labels[event.event_type] || event.event_type}</strong><small>{formatDate(event.event_time, { timeZone: 'UTC' })}</small></header>
       <p>{event.summary}</p>
@@ -61,22 +61,24 @@ function TimelineRecords({ patientId, month }) {
   </>
 }
 
-export function PatientTimeline({ patientId, defaultMonth }) {
+export function PatientTimeline({ patientId, defaultMonth, revision = 0, onMonthChange }) {
   const [month, setMonth] = useState(defaultMonth)
   const [refresh, setRefresh] = useState(0)
   function viewMonth(event) {
     event.preventDefault()
-    setMonth(String(new FormData(event.currentTarget).get('month')))
+    const nextMonth = String(new FormData(event.currentTarget).get('month'))
+    setMonth(nextMonth)
+    onMonthChange?.(nextMonth)
     setRefresh((value) => value + 1)
   }
   return <Surface className="data-surface">
     <div className="surface-toolbar"><div><strong>Patient timeline</strong><small>{isDemoMode ? 'Unavailable in preview mode' : 'Imported from Oracle · stored in Cassandra'}</small></div>
       <form className="toolbar-actions" onSubmit={viewMonth}><label className="status-editor">Month <input type="month" name="month" defaultValue={month} required /></label><button type="submit" className="secondary-button">View timeline</button></form>
     </div>
-    <p className="timeline-note">Showing {month}. Records use their original dates. This timeline updates when the import command runs; it is not synchronized automatically. Invoice summaries show current imported status, not payment-event timestamps.</p>
+    <p className="timeline-note">Showing {month}. Use Refresh from Oracle to copy new and updated records. Invoice summaries show current imported status, not payment-event timestamps.</p>
     {!patientId ? <EmptyState title="Select a patient to view their timeline" message="Use the patient selector above." />
       : isDemoMode ? <EmptyState title="Cassandra reads are disabled in preview mode" message="Switch to the live API to view imported records." />
         : !month ? <EmptyState title="Choose a month" message="Select the calendar month of the records you want to view." />
-          : <TimelineRecords key={`${patientId}:${month}:${refresh}`} patientId={patientId} month={month} />}
+          : <TimelineRecords key={`${patientId}:${month}:${refresh}:${revision}`} patientId={patientId} month={month} />}
   </Surface>
 }

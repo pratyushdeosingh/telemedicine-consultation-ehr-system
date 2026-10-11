@@ -14,7 +14,7 @@
 - [x] Cassandra outage returns 503 while Oracle patient reads still succeed.
 - [x] Cassandra reconnects after recovery.
 - [x] Original allergy, history, laboratory, and billing regressions pass with test writes rolled back.
-- [x] Eight backend tests pass; frontend source lint and production build pass.
+- [x] Thirteen backend tests pass; frontend source lint and production build pass.
 - [x] Backend/root dependency audit reports no known production vulnerabilities.
 - [x] Final hosted database connection, data import, and Vercel production verification.
 - [ ] Handwritten report, sanitized screenshots, and team rehearsal.
@@ -23,11 +23,11 @@ The import counts describe the tested snapshot, not a permanent expected number.
 
 ## Suggested demonstration
 
-1. Open the existing Oracle medical-history page and select `PAT-01`.
-2. Show the Cassandra timeline for August 2026, then September 2026.
+1. Open the Oracle medical-history page and select `PAT-01`; follow its Cassandra timeline link.
+2. Show the dedicated Cassandra Timeline page, both connection indicators, and August/September 2026 records.
 3. Explain the partition key and clustering columns using `cassandra/schema.cql`.
 4. Execute the short examples in `cassandra/queries.cql`: partition read, date range, LIMIT, then isolated CRUD.
-5. From `backend`, run `npm run timeline:import` and explain the read-only Oracle snapshot and CQL upserts.
+5. Click **Refresh from Oracle** and explain the read-only Oracle snapshot, CQL upserts, and displayed result. The CLI remains a maintenance option.
 6. Run the import again and show that rows are not duplicated.
 7. Explain why an Oracle change needs another import before it appears in Cassandra.
 8. Show `npm run timeline:verify -- --outage` results: timeline fails gracefully, Oracle works, then Cassandra recovers.
