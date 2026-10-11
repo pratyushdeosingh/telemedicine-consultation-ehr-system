@@ -4,7 +4,7 @@ A telemedicine and electronic health record application built with React, Expres
 
 [Live demo](https://telemedicine-consultation-ehr-syste.vercel.app/) · [API reference](backend/README.md) · [Deployment guide](deploy/VERCEL.md)
 
-The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete; the planned Cassandra extension for D.A. 3 is not yet implemented.
+The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete. D.A. 3 development has started with [local Apache Cassandra setup](cassandra/README.md); Oracle import, the website timeline, and hosted Cassandra integration are subsequent stages.
 
 ## Features
 
@@ -51,7 +51,8 @@ Writes commit after all related statements succeed and roll back on failure. Ora
 ```text
 api/          Vercel function entry point
 backend/      Express routes, Oracle configuration, tests, and verification scripts
-database/     Schema, sample data, upgrades, and SQL/PLSQL evidence
+database/     Oracle schema, sample data, upgrades, and SQL/PLSQL evidence
+cassandra/    Local Cassandra service, CQL schema, sample records, and checks
 deploy/       Deployment instructions and local configuration helpers
 docs/         Workflow explanations, report material, and verification history
 frontend/     React application and Vite configuration
