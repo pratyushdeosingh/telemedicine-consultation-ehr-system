@@ -127,6 +127,35 @@ The schema contains **18 related tables**, supported by primary/foreign keys, ch
 | Laboratory | `LAB_TEST_CATALOG`, `LAB_ORDER`, `TEST_RESULT` | Separates available tests, requested tests, and reported results. |
 | Invoicing | `BILLING_INVOICE` | Stores appointment-linked totals and invoice status. |
 
+### Website coverage of all 18 Oracle tables
+
+All 18 tables participate in website features. Usage does not mean that every table has a separate page or supports every CRUD operation; reference data is read where it helps a workflow.
+
+| Table | Website feature and use |
+| --- | --- |
+| `PATIENT` | Patient directory and registration; patient selection throughout care workflows. |
+| `PATIENT_PHONE` | Patient directory displays each patient's phone numbers, including multiple numbers. |
+| `INSURANCE_PROVIDER` | Registration selects a stored policy; patient records show provider and coverage limit through a `LEFT JOIN`. Coverage is informational, not an insurance claim calculation. |
+| `DOCTOR` | Appointment booking selects a doctor and shows their specialization. |
+| `DOCTOR_QUALIFICATION` | Selecting a doctor during booking displays all recorded qualifications. |
+| `DEPARTMENT` | Doctor and appointment queries display the doctor's department. |
+| `MEDICAL_LOG` | Medical history displays and creates dated clinical entries. |
+| `LOG_ALLERGIES` | History records allergies; prescription safety checks use them. |
+| `APPOINTMENT` | Consultation booking, listing and status updates link patients to doctors. |
+| `TELEMEDICINE_SESSION` | Virtual appointment cards expand to show session times, network notes and transcript references. The booking trigger creates a placeholder session. |
+| `PHARMACY` | Prescription creation selects an optional dispensing pharmacy. |
+| `MEDICINE` | Prescription item selection, medicine prices and known allergen classes. |
+| `PRESCRIPTION` | Prescription headers displayed and created for appointments. |
+| `PRESCRIPTION_ITEM` | Individual medicines, dosage, duration and quantity; used by the allergy trigger and invoice calculation. |
+| `LAB_TEST_CATALOG` | Lab ordering selects tests and displays their standard charges. |
+| `LAB_ORDER` | Lab requests displayed and created for appointments. |
+| `TEST_RESULT` | Lab results displayed and recorded against orders. |
+| `BILLING_INVOICE` | Invoice generation, reconciliation, recalculation and payment/refund status. |
+
+Phone numbers and qualifications are read as simple child-table queries and grouped in JavaScript, preserving patients/doctors with no child records. These reference records remain maintained through Oracle SQL; there are no website editors for phone numbers, qualifications or insurance-provider catalogs. Transcript paths are stored references, not downloadable files hosted by this application. The separate Cassandra timeline uses one additional table, `clinical_events_by_patient_month`.
+
+For a professor's demonstration, open **Patients** to show phones and insurance, open **Register patient** to show policy selection, select a doctor in **Book appointment** to show qualifications, and expand a virtual appointment's **Telemedicine session records**. The remaining table usage is visible in Medical history, Prescriptions, Lab tests and Billing.
+
 ### PL/SQL objects
 
 | Object | Type | Responsibility |

@@ -9,7 +9,7 @@ import { SearchField } from '../components/SearchField.jsx'
 import { StatusBadge } from '../components/StatusBadge.jsx'
 import { Surface } from '../components/Surface.jsx'
 import { useApiResource } from '../hooks/useApiResource.js'
-import { getInitials } from '../utils/formatters.js'
+import { formatCurrency, getInitials } from '../utils/formatters.js'
 
 export function PatientsPage() {
   const [query, setQuery] = useState('')
@@ -21,6 +21,7 @@ export function PatientsPage() {
     dob: '', gender: '', emergency_contact: '', policy_no: '',
   })
   const { data, error, isError, isLoading, reload } = useApiResource(api.getPatients)
+  const { data: providers, isError: providersError, error: providerError, reload: reloadProviders } = useApiResource(api.getInsuranceProviders)
   const filteredPatients = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     if (!normalizedQuery) return data
@@ -74,7 +75,8 @@ export function PatientsPage() {
             <label><span>State</span><input name="state" value={form.state} onChange={updateField} /></label>
             <label><span>ZIP code</span><input name="zip_code" value={form.zip_code} onChange={updateField} /></label>
             <label><span>Emergency contact</span><input name="emergency_contact" value={form.emergency_contact} onChange={updateField} /></label>
-            <label><span>Insurance policy</span><input name="policy_no" value={form.policy_no} onChange={updateField} placeholder="Optional" /></label>
+            <label><span>Insurance policy</span><select name="policy_no" value={form.policy_no} onChange={updateField}><option value="">Self-pay / no policy</option>{providers.map((provider) => <option key={provider.policy_no} value={provider.policy_no}>{provider.provider_name} · {provider.policy_no} · {formatCurrency(provider.coverage_limit)}</option>)}</select></label>
+            {providersError && <div className="form-span-2"><ErrorState error={providerError} onRetry={reloadProviders} /></div>}
             <div className="form-footer form-span-2">
               <ActionFeedback feedback={feedback} />
               <button className="primary-button" type="submit" disabled={isSaving}><Save size={15} /> {isSaving ? 'Saving…' : 'Register patient'}</button>
@@ -97,6 +99,10 @@ export function PatientsPage() {
                   <div className="record-primary"><strong><Link to={`/medical-history?patient=${encodeURIComponent(patient.patient_id)}`}>{fullName}</Link></strong><small>{patient.patient_id} · {patient.gender}</small></div>
                   <div className="record-detail"><MapPin size={15} /><span><strong>{patient.city}</strong><small>{patient.state}</small></span></div>
                   <StatusBadge tone={patient.policy_no ? 'positive' : 'neutral'}>{patient.policy_no ?? 'Self-pay'}</StatusBadge>
+                  <div className="related-records">
+                    <p><strong>Phone numbers:</strong> {patient.phone_numbers?.join(', ') || 'No phone numbers recorded'}</p>
+                    <p><strong>Insurance:</strong> {patient.provider_name ? `${patient.provider_name} · Policy ${patient.policy_no} · Coverage limit ${formatCurrency(patient.coverage_limit)}` : 'Self-pay / no insurance policy'}</p>
+                  </div>
                 </article>
               )
             })}

@@ -45,6 +45,37 @@ async function main() {
             assert.equal(response.status, expected, `${method} ${route}: ${result.error || 'unexpected status'}`);
             return result;
         }
+        const patients = await request('/patients');
+        const phoneRows = (await connection.execute('SELECT Patient_ID, Phone_Number FROM PATIENT_PHONE ORDER BY Patient_ID, Phone_Number')).rows;
+        assert.ok(phoneRows.length, 'Need sample phone records to verify website coverage');
+        for (const patient of patients) {
+            assert.deepEqual(patient.phone_numbers, phoneRows.filter(row => row[0] === patient.patient_id).map(row => row[1]));
+        }
+        const providers = await request('/insurance-providers');
+        assert.ok(providers.length, 'Need sample insurance providers');
+        for (const patient of patients.filter(row => row.policy_no)) {
+            const provider = providers.find(row => row.policy_no === patient.policy_no);
+            assert.ok(provider);
+            assert.equal(patient.provider_name, provider.provider_name);
+            assert.equal(patient.coverage_limit, provider.coverage_limit);
+        }
+        assert.ok(patients.some(row => !row.policy_no), 'LEFT JOIN must retain self-pay patients');
+        const doctors = await request('/doctors');
+        const qualificationRows = (await connection.execute('SELECT Doctor_ID, Qualification FROM DOCTOR_QUALIFICATION ORDER BY Doctor_ID, Qualification')).rows;
+        assert.ok(qualificationRows.length, 'Need sample qualification records');
+        for (const doctor of doctors) {
+            assert.deepEqual(doctor.qualifications, qualificationRows.filter(row => row[0] === doctor.doctor_id).map(row => row[1]));
+        }
+        const sessions = await request('/telemedicine-sessions');
+        assert.equal(sessions.length, (await connection.execute('SELECT COUNT(*) FROM TELEMEDICINE_SESSION')).rows[0][0]);
+        assert.ok(sessions.length, 'Need sample session records');
+        const virtual = await request('/appointments', 'POST', { patient_id: patientId, doctor_id: doctorId,
+            appointment_date: '2026-10-11', appointment_time: '09:00 AM', status: 'Scheduled', consultation_mode: 'Virtual', meeting_link: null }, 201);
+        const placeholder = (await request('/telemedicine-sessions')).find(row => row.appointment_id === virtual.appointment_id);
+        assert.ok(placeholder, 'Virtual booking must create a session in the same transaction');
+        assert.equal(placeholder.start_time, null);
+        assert.equal(placeholder.network_quality_log, 'Session created automatically');
+        console.log('PASS: website phone arrays, insurance join/selector, qualifications and virtual session trigger/readback');
         await connection.execute(`INSERT INTO APPOINTMENT (Appointment_ID, Patient_ID, Doctor_ID, Appointment_Date, Appointment_Time, Status, Consultation_Mode)
             VALUES (:id, :patientId, :doctorId, DATE '2026-10-10', '10:00 AM', 'Scheduled', 'In-Person')`, { id: appointmentId, patientId, doctorId });
         const appointments = await request('/appointments');

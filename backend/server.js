@@ -183,16 +183,21 @@ app.get('/api/patients', async (req, res) => {
 
         const result = await connection.execute(`
             SELECT
-                Patient_ID,
-                First_Name,
-                Last_Name,
-                City,
-                State,
-                Gender,
-                Policy_No
-            FROM PATIENT
-            ORDER BY Patient_ID
+                p.Patient_ID,
+                p.First_Name,
+                p.Last_Name,
+                p.City,
+                p.State,
+                p.Gender,
+                p.Policy_No,
+                ip.Provider_Name,
+                ip.Coverage_Limit
+            FROM PATIENT p
+            LEFT JOIN INSURANCE_PROVIDER ip ON p.Policy_No = ip.Policy_No
+            ORDER BY p.Patient_ID
         `);
+
+        const phones = await connection.execute('SELECT Patient_ID, Phone_Number FROM PATIENT_PHONE ORDER BY Patient_ID, Phone_Number');
 
         const patients = result.rows.map(row => ({
             patient_id: row[0],
@@ -201,7 +206,10 @@ app.get('/api/patients', async (req, res) => {
             city: row[3],
             state: row[4],
             gender: row[5],
-            policy_no: row[6]
+            policy_no: row[6],
+            provider_name: row[7],
+            coverage_limit: row[8],
+            phone_numbers: phones.rows.filter(phone => phone[0] === row[0]).map(phone => phone[1])
         }));
 
         res.json(patients);
@@ -216,6 +224,20 @@ app.get('/api/patients', async (req, res) => {
         if (connection) {
             await connection.close();
         }
+    }
+});
+
+app.get('/api/insurance-providers', async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute('SELECT Policy_No, Provider_Name, Coverage_Limit FROM INSURANCE_PROVIDER ORDER BY Provider_Name, Policy_No');
+        res.json(result.rows.map(row => ({ policy_no: row[0], provider_name: row[1], coverage_limit: row[2] })));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: safeError(err) });
+    } finally {
+        if (connection) await connection.close();
     }
 });
 
@@ -240,6 +262,7 @@ app.get('/api/doctors', async (req, res) => {
             ORDER BY d.Doctor_ID
         `);
 
+        const qualifications = await connection.execute('SELECT Doctor_ID, Qualification FROM DOCTOR_QUALIFICATION ORDER BY Doctor_ID, Qualification');
         const doctors = result.rows.map(row => ({
             doctor_id: row[0],
             first_name: row[1],
@@ -247,7 +270,8 @@ app.get('/api/doctors', async (req, res) => {
             specialization: row[3],
             email: row[4],
             primary_phone: row[5],
-            department: row[6]
+            department: row[6],
+            qualifications: qualifications.rows.filter(item => item[0] === row[0]).map(item => item[1])
         }));
 
         res.json(doctors);

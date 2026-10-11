@@ -52,6 +52,8 @@ export function AppointmentsPage() {
   const { data, error, isError, isLoading, reload } = useApiResource(api.getAppointments)
   const { data: patients } = useApiResource(api.getPatients)
   const { data: doctors } = useApiResource(api.getDoctors)
+  const { data: sessions, isLoading: sessionsLoading, isError: sessionsError, error: sessionError, reload: reloadSessions } = useApiResource(api.getTelemedicineSessions)
+  const selectedDoctor = doctors.find((doctor) => doctor.doctor_id === form.doctor_id)
   const appointments = useMemo(() => activeFilter === 'All' ? data : data.filter((item) => item.status === activeFilter), [activeFilter, data])
   const virtualCount = data.filter((item) => item.consultation_mode === 'Virtual').length
 
@@ -68,7 +70,7 @@ export function AppointmentsPage() {
       const result = await api.createAppointment({ ...form, meeting_link: form.meeting_link || null })
       setFeedback({ type: 'success', message: `Appointment ${result.appointment_id} booked successfully.` })
       setForm({ patient_id: '', doctor_id: '', appointment_date: '', appointment_time: '', status: 'Scheduled', consultation_mode: 'Virtual', meeting_link: '' })
-      await reload()
+      await Promise.all([reload(), reloadSessions()])
     } catch (requestError) {
       setFeedback({ type: 'error', message: requestError.message })
     } finally {
@@ -93,6 +95,7 @@ export function AppointmentsPage() {
           <form className="record-form" onSubmit={submitAppointment}>
             <label><span>Patient *</span><select name="patient_id" value={form.patient_id} onChange={updateField} required><option value="">Select patient</option>{patients.map((patient) => <option key={patient.patient_id} value={patient.patient_id}>{patient.patient_id} · {patient.first_name} {patient.last_name}</option>)}</select></label>
             <label><span>Doctor *</span><select name="doctor_id" value={form.doctor_id} onChange={updateField} required><option value="">Select doctor</option>{doctors.map((doctor) => <option key={doctor.doctor_id} value={doctor.doctor_id}>{doctor.doctor_id} · Dr. {doctor.first_name} {doctor.last_name}</option>)}</select></label>
+            {selectedDoctor && <div className="form-span-2 clinician-details"><strong>Dr. {selectedDoctor.first_name} {selectedDoctor.last_name}</strong><p>{selectedDoctor.department} · {selectedDoctor.specialization}</p><p>Qualifications: {selectedDoctor.qualifications?.join(', ') || 'Not recorded'}</p></div>}
             <label><span>Date *</span><input type="date" name="appointment_date" value={form.appointment_date} onChange={updateField} required /></label>
             <label><span>Time *</span><input name="appointment_time" value={form.appointment_time} onChange={updateField} placeholder="10:30 AM" required /></label>
             <label><span>Status *</span><select name="status" value={form.status} onChange={updateField}>{statuses.map((status) => <option key={status}>{status}</option>)}</select></label>
@@ -109,6 +112,7 @@ export function AppointmentsPage() {
         </div>
         {isLoading && <LoadingState label="Loading appointments" />}
         {isError && <ErrorState error={error} onRetry={reload} />}
+        {sessionsError && <ErrorState error={sessionError} onRetry={reloadSessions} />}
         {!isLoading && !isError && appointments.length === 0 && <EmptyState title="No appointments in this state" />}
         {!isLoading && !isError && appointments.length > 0 && (
           <div className="appointment-timeline">
@@ -120,6 +124,17 @@ export function AppointmentsPage() {
                   <div className="appointment-person"><span className="avatar is-small">{getInitials(appointment.patient_name)}</span><span><strong>{appointment.patient_name}</strong><small>{appointment.appointment_id} · {appointment.appointment_time}</small></span></div>
                   <div className="appointment-clinician"><Stethoscope size={16} /><span><strong>Dr. {appointment.doctor_name}</strong><small>{appointment.department}</small></span></div>
                   <div className="appointment-status"><StatusBadge tone={toneForStatus(appointment.status)}>{appointment.status}</StatusBadge><small>{appointment.consultation_mode}</small><AppointmentStatusControl appointment={appointment} onSaved={reload} /></div>
+                  {appointment.consultation_mode === 'Virtual' && <details className="related-records"><summary>Telemedicine session records ({sessionsLoading ? 'loading' : sessionsError ? 'unavailable' : sessions.filter((session) => session.appointment_id === appointment.appointment_id).length})</summary>
+                    <p>Stored session metadata; this application does not host video calls.</p>
+                    {sessions.filter((session) => session.appointment_id === appointment.appointment_id).map((session) => <div className="session-record" key={`${session.appointment_id}:${session.session_id}`}>
+                      <strong>{session.session_id}</strong>
+                      <p>Start: {session.start_time ? formatDate(session.start_time, { hour: '2-digit', minute: '2-digit' }) : 'Not started'} · End: {session.end_time ? formatDate(session.end_time, { hour: '2-digit', minute: '2-digit' }) : 'Not recorded'}</p>
+                      <p>Network: {session.network_quality_log || 'Not recorded'}</p>
+                      <p>Transcript reference: {session.chat_transcript_url || 'Not recorded'}</p>
+                    </div>)}
+                    {sessionsLoading && <p>Loading session records…</p>}
+                    {!sessionsLoading && !sessionsError && !sessions.some((session) => session.appointment_id === appointment.appointment_id) && <p>No session records available.</p>}
+                  </details>}
                 </article>
               )
             })}
