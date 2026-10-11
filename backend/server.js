@@ -533,8 +533,8 @@ app.get('/api/telemedicine-sessions', async (req, res) => {
                 ts.Appointment_ID,
                 p.First_Name || ' ' || p.Last_Name AS Patient_Name,
                 d.First_Name || ' ' || d.Last_Name AS Doctor_Name,
-                ts.Start_Time,
-                ts.End_Time,
+                TO_CHAR(ts.Start_Time, 'YYYY-MM-DD"T"HH24:MI:SS'),
+                TO_CHAR(ts.End_Time, 'YYYY-MM-DD"T"HH24:MI:SS'),
                 ts.Network_Quality_Log,
                 ts.Chat_Transcript_URL
             FROM TELEMEDICINE_SESSION ts

@@ -69,6 +69,14 @@ async function main() {
         const sessions = await request('/telemedicine-sessions');
         assert.equal(sessions.length, (await connection.execute('SELECT COUNT(*) FROM TELEMEDICINE_SESSION')).rows[0][0]);
         assert.ok(sessions.length, 'Need sample session records');
+        const storedSessions = (await connection.execute(`SELECT Appointment_ID, Session_ID,
+            TO_CHAR(Start_Time, 'YYYY-MM-DD"T"HH24:MI:SS'), TO_CHAR(End_Time, 'YYYY-MM-DD"T"HH24:MI:SS')
+            FROM TELEMEDICINE_SESSION`)).rows;
+        for (const session of sessions) {
+            const stored = storedSessions.find(row => row[0] === session.appointment_id && row[1] === session.session_id);
+            assert.equal(session.start_time, stored[2], 'Preserve the stored clock time across server time zones');
+            assert.equal(session.end_time, stored[3]);
+        }
         const virtual = await request('/appointments', 'POST', { patient_id: patientId, doctor_id: doctorId,
             appointment_date: '2026-10-11', appointment_time: '09:00 AM', status: 'Scheduled', consultation_mode: 'Virtual', meeting_link: null }, 201);
         const placeholder = (await request('/telemedicine-sessions')).find(row => row.appointment_id === virtual.appointment_id);
