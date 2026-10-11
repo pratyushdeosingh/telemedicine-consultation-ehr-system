@@ -67,12 +67,16 @@ On 11 October 2026, the driver/API/website stage was implemented and verified:
 - Browser checks confirmed August/September month switching, five September record types for PAT-01, and the empty-month state.
 - Screenshot evidence is stored in `screenshots/da3-local-timeline.png` and `screenshots/da3-timeline-detail.png`.
 
-## Remaining work
+## Cloud and production verification
 
-Astra DB Free was selected on 11 October 2026. The Serverless (non-vector) database `care-continuum-da3` was created in AWS Ohio (`us-east-2`) with keyspace `care_continuum`. A custom role limits CQL connection, schema description, table creation, and record selection/modification to this keyspace; its import token expires on 9 January 2027 and is stored only in ignored backend configuration.
+Astra DB Free was selected on 11 October 2026. The Serverless (non-vector) database `care-continuum-da3` is Active in AWS Ohio (`us-east-2`) with keyspace `care_continuum`. A custom role limits CQL connection, schema description, table creation, and record selection/modification to this keyspace. Its token expires on 9 January 2027; credentials are stored in ignored backend configuration and Vercel Production secrets, never in Git or frontend code.
 
-The database subsequently reached **Active**, with its Ohio region **Online**. The in-app browser could not save the Secure Connect Bundle: its download navigated to an expired signed URL, and the button does not expose a downloadable link to the browser's file-download API. A manual ZIP download was requested. Vercel account access was confirmed, and the existing production deployment still points to D.A. 2 commit `e4b4868` on `main`.
+The existing keyspace's timeline table was created without removing rows. All 55 Oracle source events imported into 18 cloud partitions with zero failures. The verification script confirmed matching source dates/summaries, repeat imports without duplicates, real API paging without missing/duplicate records, ordering, invalid-month rejection, empty partitions, and successful health checks. All eight backend tests passed with loopback network access enabled.
 
-The ZIP was subsequently downloaded by the user and configured privately. The existing keyspace's timeline table was created without removing rows. All 55 Oracle source events imported into 18 cloud partitions with zero failures. The verification script confirmed matching source dates/summaries, repeat imports without duplicates, real API paging without missing/duplicate records, ordering, invalid-month rejection, empty partitions, and successful health checks. All eight backend tests also passed with loopback network access enabled.
+The verified branch was fast-forwarded to `main` and pushed at commit `197cdcb`. Vercel deployment `3Xzm1ogehUyuJeeVmzD8EWZPMCvV` reached Ready and serves the production domain. The live Oracle patients endpoint and both timeline endpoints returned 401 without a session. Authenticated browser checks confirmed PAT-01's two August history entries, five September events (result, appointment, invoice, order, prescription), and December's empty state. Oracle remained connected; nine lab orders/results and eight invoices loaded with their existing controls. Screenshot evidence is stored in `screenshots/da3-production-timeline.png`.
 
-Vercel release remains pending. No D.A. 3 changes have been merged into the deployed main branch. Multi-node replication/scale demonstrations require a separate confirmed requirement.
+The final Oracle workflow regression again passed, including the real allergy conflict/rollback and billing protections; all verification writes were rolled back. Production verification used reads only. Cloud API paging was tested through the local backend connected to Astra; the browser smoke test checked production timeline reads and month behavior.
+
+## Remaining academic deliverables
+
+The handwritten report and demonstration rehearsal remain student work. Multi-node replication/scale demonstrations require a separate confirmed requirement and have not been claimed as tested.

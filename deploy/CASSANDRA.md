@@ -1,6 +1,6 @@
 # Cassandra cloud deployment
 
-Status: Astra DB Free is Active and its connection, 55-event import, repeat-import idempotency, source parity, and real API paging/validation/health checks passed on 11 October 2026. Vercel production rollout remains pending. The existing deployed D.A. 2 site remains the baseline.
+Status: Astra DB Free is Active and its connection, 55-event import, repeat-import idempotency, source parity, and real API paging/validation/health checks passed on 11 October 2026. The D.A. 3 release is deployed on Vercel; authenticated browser checks confirmed the timeline, month switching, empty months, and existing Oracle laboratory/billing pages. Unauthenticated Oracle and timeline endpoints return 401.
 
 ## Student steps for Astra DB
 

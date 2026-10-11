@@ -1,6 +1,6 @@
 # D.A. 3 implementation plan
 
-Status: local Cassandra setup, schema, eight synthetic records, CQL demonstrations, and restart-persistence verification completed on 11 October 2026. Oracle import and the authenticated API/website timeline are implemented and verified locally. Astra DB Free is configured and the cloud import, source parity, repeat-import idempotency, and real API tests pass. Vercel production rollout remains pending. The completed D.A. 2 application remains the baseline. No deadline is used to size or prioritize this work.
+Status: local Cassandra setup, schema, eight synthetic records, CQL demonstrations, and restart-persistence verification completed on 11 October 2026. Oracle import and the authenticated API/website timeline are implemented and verified locally and with Astra DB Free. The release is deployed on Vercel, where timeline records, month switching, empty months, authentication protection, and existing Oracle laboratory/billing pages were verified. No deadline is used to size or prioritize this work.
 
 ## 1. Objective
 

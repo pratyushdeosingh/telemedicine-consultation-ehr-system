@@ -80,4 +80,4 @@ With the backend's local Cassandra settings enabled, run `npm run timeline:impor
 
 The Medical History page now includes the timeline. Select a patient and month (for example, PAT-01 and September 2026). The View timeline button re-reads Cassandra; it does not trigger an import.
 
-Hosted deployment still requires a remote database and credentials; see [the cloud guide](../deploy/CASSANDRA.md). Vercel cannot connect to this laptop-local container.
+The hosted site uses the verified Astra DB Free connection; see [the cloud guide](../deploy/CASSANDRA.md). Local demonstrations can use this persistent Apache Cassandra container. Vercel connects to Astra rather than the laptop-local container.

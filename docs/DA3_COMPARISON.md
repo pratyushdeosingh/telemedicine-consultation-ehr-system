@@ -10,7 +10,7 @@ Care Continuum uses Oracle for authoritative clinical and billing workflows and 
 | Writes | Related statements commit together or roll back | Prepared inserts upsert stable timeline keys; an import can partially fail and be retried |
 | Ordering | SQL `ORDER BY` | Clustering columns order records within a partition |
 | Duplicate identity | Duplicate primary-key insert is rejected | An insert at the same primary key updates the row |
-| Current deployment | Oracle Autonomous Database accessed from Vercel | Actual Apache Cassandra 5.0.9 locally; hosted setup pending |
+| Current deployment | Oracle Autonomous Database accessed from Vercel | Apache Cassandra 5.0.9 locally; Astra DB Free accessed from Vercel |
 | Suitable role | Prescription rejection and billing transactions | Chronological reads over repeated, dated patient records |
 
 ## Why this table fits

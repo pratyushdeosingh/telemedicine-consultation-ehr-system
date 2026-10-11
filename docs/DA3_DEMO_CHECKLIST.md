@@ -16,7 +16,7 @@
 - [x] Original allergy, history, laboratory, and billing regressions pass with test writes rolled back.
 - [x] Eight backend tests pass; frontend source lint and production build pass.
 - [x] Backend/root dependency audit reports no known production vulnerabilities.
-- [ ] Final hosted database connection, data import, and Vercel production verification.
+- [x] Final hosted database connection, data import, and Vercel production verification.
 - [ ] Handwritten report, sanitized screenshots, and team rehearsal.
 
 The import counts describe the tested snapshot, not a permanent expected number. Newly added Oracle records increase the count after another import.
