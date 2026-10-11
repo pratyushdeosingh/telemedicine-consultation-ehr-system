@@ -4,7 +4,7 @@ A telemedicine and electronic health record application built with React, Expres
 
 [Live demo](https://telemedicine-consultation-ehr-syste.vercel.app/) · [API reference](backend/README.md) · [Deployment guide](deploy/VERCEL.md)
 
-The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete. The D.A. 3 extension is implemented and verified locally: an explicit Oracle import populates a Cassandra-backed patient timeline. Hosted Cassandra connection support is prepared; cloud deployment is pending. See [local setup](cassandra/README.md) and [cloud deployment](deploy/CASSANDRA.md).
+The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete. The D.A. 3 extension is implemented and verified with both local Apache Cassandra and Astra DB Free: an explicit Oracle import populates a Cassandra-backed patient timeline. The cloud database and API tests pass; Vercel production rollout is pending. See [local setup](cassandra/README.md) and [cloud deployment](deploy/CASSANDRA.md).
 
 ## Features
 

@@ -1,6 +1,6 @@
 # Cassandra cloud deployment
 
-Status: connection support and setup helpers implemented; no hosted database has been connected or verified yet. The existing deployed D.A. 2 site remains the baseline.
+Status: Astra DB Free is Active and its connection, 55-event import, repeat-import idempotency, source parity, and real API paging/validation/health checks passed on 11 October 2026. Vercel production rollout remains pending. The existing deployed D.A. 2 site remains the baseline.
 
 ## Student steps for Astra DB
 
@@ -14,6 +14,8 @@ If Astra is accepted for the hosted demonstration:
 6. Download its **Secure Connect Bundle ZIP**. Keep the token and ZIP private; do not paste credentials into chat or commit them.
 
 The managed provider controls the server/replication configuration. It is accurately described as Astra DB, powered by Cassandra, rather than a self-administered Apache Cassandra VM.
+
+The current account offered AWS Ohio (`us-east-2`) as its unlocked Free region for the non-vector database. The initial custom role, `care-continuum-da3-import`, grants only **Describe Keyspace**, **Select Table**, **Modify Table**, **Describe Table**, **Create Table**, and **Access CQL**, scoped to this database's `care_continuum` keyspace. Modify Table includes record deletion; the import code only upserts mapped synthetic records. Its token expires on **9 January 2027** and must be replaced before that date if still used. Tokens and connection bundles are never part of the repository.
 
 Official instructions: [database creation](https://docs.datastax.com/en/astra-db-serverless/databases/create-database.html), [application tokens](https://docs.datastax.com/en/astra-db-serverless/administration/manage-application-tokens.html), [driver connections](https://docs.datastax.com/en/astra-db-serverless/drivers/nodejs-driver.html).
 

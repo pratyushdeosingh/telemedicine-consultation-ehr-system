@@ -69,4 +69,10 @@ On 11 October 2026, the driver/API/website stage was implemented and verified:
 
 ## Remaining work
 
-A hosted database/account and credentials are still needed for remote verification and Vercel release. No hosted Cassandra resource was created, no cloud connection was claimed as verified, and no D.A. 3 changes have been merged into the deployed main branch. Multi-node replication/scale demonstrations require a separate confirmed requirement.
+Astra DB Free was selected on 11 October 2026. The Serverless (non-vector) database `care-continuum-da3` was created in AWS Ohio (`us-east-2`) with keyspace `care_continuum`. A custom role limits CQL connection, schema description, table creation, and record selection/modification to this keyspace; its import token expires on 9 January 2027 and is stored only in ignored backend configuration.
+
+The database subsequently reached **Active**, with its Ohio region **Online**. The in-app browser could not save the Secure Connect Bundle: its download navigated to an expired signed URL, and the button does not expose a downloadable link to the browser's file-download API. A manual ZIP download was requested. Vercel account access was confirmed, and the existing production deployment still points to D.A. 2 commit `e4b4868` on `main`.
+
+The ZIP was subsequently downloaded by the user and configured privately. The existing keyspace's timeline table was created without removing rows. All 55 Oracle source events imported into 18 cloud partitions with zero failures. The verification script confirmed matching source dates/summaries, repeat imports without duplicates, real API paging without missing/duplicate records, ordering, invalid-month rejection, empty partitions, and successful health checks. All eight backend tests also passed with loopback network access enabled.
+
+Vercel release remains pending. No D.A. 3 changes have been merged into the deployed main branch. Multi-node replication/scale demonstrations require a separate confirmed requirement.
