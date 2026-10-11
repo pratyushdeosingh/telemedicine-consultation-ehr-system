@@ -1,6 +1,6 @@
 # D.A. 3 implementation plan
 
-Status: local Cassandra setup, schema, eight synthetic records, CQL demonstrations, and restart-persistence verification completed on 11 October 2026. Oracle import, API/website timeline, and hosted integration remain pending. The completed D.A. 2 application remains the baseline. No deadline is used to size or prioritize this work.
+Status: local Cassandra setup, schema, eight synthetic records, CQL demonstrations, and restart-persistence verification completed on 11 October 2026. Oracle import and the authenticated API/website timeline are now implemented and verified locally. Hosted integration remains pending a provider/account and credentials. The completed D.A. 2 application remains the baseline. No deadline is used to size or prioritize this work.
 
 ## 1. Objective
 

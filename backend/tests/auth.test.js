@@ -28,6 +28,9 @@ test('demo API requires login and rejects a foreign origin', async () => {
     try {
         const blocked = await fetch(`${base}/api/patients`);
         assert.equal(blocked.status, 401);
+        for (const route of ['/api/timeline/health', '/api/timeline/PAT-01?month=2026-09']) {
+            assert.equal((await fetch(base + route)).status, 401);
+        }
 
         const foreign = await fetch(`${base}/api/login`, {
             method: 'POST',

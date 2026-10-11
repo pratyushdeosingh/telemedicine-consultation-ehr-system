@@ -26,6 +26,8 @@ All routes below use the `/api` prefix. Production data routes require a signed 
 | GET | `/lab-orders` | List lab orders |
 | GET | `/test-results` | List reported results |
 | GET | `/telemedicine-sessions` | List virtual-session metadata |
+| GET | `/timeline/health` | Check timeline configuration and Cassandra access |
+| GET | `/timeline/:patient_id?month=YYYY-MM` | Read a Cassandra partition; optional `limit` and signed `cursor` |
 | GET | `/billing` | List stored and calculated invoice totals |
 | GET | `/billing/:appointment_id/items` | List current medicine and lab charges |
 | POST | `/patients` | Register a patient through PL/SQL |
@@ -68,3 +70,7 @@ npm run db:verify-workflows
 ```
 
 The workflow check requires Oracle and uses a temporary server with rolled-back synthetic changes. Schema/evidence commands are documented in [database/README.md](../database/README.md).
+
+## Cassandra commands
+
+`npm run timeline:setup` creates the table in an existing keyspace. `npm run timeline:import` reads Oracle and upserts timeline records. `npm run timeline:verify` checks both databases and paging; add `-- --outage` only for local Docker failure/recovery verification. See [cloud setup](../deploy/CASSANDRA.md) and the [comparison](../docs/DA3_COMPARISON.md).

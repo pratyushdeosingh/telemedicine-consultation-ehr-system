@@ -23,7 +23,9 @@ async function request(path, options = {}) {
 
   if (!response.ok) {
     const message = payload?.error ?? payload?.message ?? 'The API request failed.'
-    throw new Error(message)
+    const error = new Error(message)
+    error.status = response.status
+    throw error
   }
 
   return payload
@@ -57,6 +59,12 @@ export const api = {
   getDoctors: () => isDemoMode ? Promise.resolve([]) : request('/doctors'),
   getMedicines: () => isDemoMode ? Promise.resolve([]) : request('/medicines'),
   getPharmacies: () => isDemoMode ? Promise.resolve([]) : request('/pharmacies'),
+  getTimeline: (patientId, month, cursor, signal) => {
+    if (isDemoMode) return Promise.resolve({ events: [], next_cursor: null, source: 'preview' })
+    const params = new URLSearchParams({ month })
+    if (cursor) params.set('cursor', cursor)
+    return request(`/timeline/${encodeURIComponent(patientId)}?${params}`, { signal })
+  },
   getMedicalLogs: () => isDemoMode ? Promise.resolve(demoData.medicalLogs ?? []) : request('/medical-logs'),
   getAllergies: () => isDemoMode ? Promise.resolve(demoData.allergies ?? []) : request('/allergies'),
   getLabOrders: () => isDemoMode ? Promise.resolve(demoData.labOrders ?? []) : request('/lab-orders'),

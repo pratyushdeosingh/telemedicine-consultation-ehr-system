@@ -52,6 +52,21 @@ docker compose -f cassandra/compose.yaml exec -T cassandra cqlsh -f /tmp/da3-que
 
 The temporary `DEMO-VERIFY` and `DEMO-CRUD` test rows were deleted. The eight seed records remain available for learning.
 
+## Oracle import and application verification
+
+On 11 October 2026, the driver/API/website stage was implemented and verified:
+
+- Apache Cassandra Node.js driver 4.10.0 installed for local backend and Vercel packaging.
+- 55 Oracle source events imported into 18 patient/month partitions using a read-only snapshot.
+- All mapped dates and summaries matched the source; a second import created no duplicates.
+- Real API paging, month validation, empty states, and authenticated-route protection passed.
+- A real Docker Cassandra outage returned HTTP 503 for the timeline while Oracle patient reads remained available; recovery reconnected successfully.
+- Original Oracle allergy, history, lab, and billing checks passed with all test writes rolled back.
+- Eight backend tests, frontend lint, production build, and documentation link checks passed.
+- Backend and root production dependency audit reported zero known vulnerabilities.
+- Browser checks confirmed August/September month switching, five September record types for PAT-01, and the empty-month state.
+- Screenshot evidence is stored in `screenshots/da3-local-timeline.png` and `screenshots/da3-timeline-detail.png`.
+
 ## Remaining work
 
-Oracle import, backend Cassandra driver/API, website timeline, hosted database, and production verification have not been implemented yet. Oracle was not accessed or modified by this stage. The existing Vercel application remains unchanged. A single-node local setup is not evidence of replication, scale-out, or failover.
+A hosted database/account and credentials are still needed for remote verification and Vercel release. No hosted Cassandra resource was created, no cloud connection was claimed as verified, and no D.A. 3 changes have been merged into the deployed main branch. Multi-node replication/scale demonstrations require a separate confirmed requirement.

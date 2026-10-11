@@ -4,6 +4,8 @@
 | --- | --- |
 | [DA3_IMPLEMENTATION_PLAN.md](DA3_IMPLEMENTATION_PLAN.md) | D.A. 3 scope, stages, student responsibilities, and release checks |
 | [DA3_SETUP_RECORD.md](DA3_SETUP_RECORD.md) | Local Cassandra version, sample data, and verified query/persistence results |
+| [DA3_COMPARISON.md](DA3_COMPARISON.md) | Oracle/Cassandra comparison and synchronization limits |
+| [DA3_DEMO_CHECKLIST.md](DA3_DEMO_CHECKLIST.md) | Verified features, remaining hosted steps, and report/demo outline |
 | [DA3_QUERY_GUIDE.md](DA3_QUERY_GUIDE.md) | Simple explanations of the local Cassandra model and CQL examples |
 | [DA2_COMPLETION.md](DA2_COMPLETION.md) | Current workflow rules, query explanations, verification, and demonstration steps |
 | [DA2_CHECKLIST.md](DA2_CHECKLIST.md) | Database implementation and report-evidence checklist |

@@ -4,6 +4,7 @@ const oracledb = require('oracledb');
 const cors = require('cors');
 const crypto = require('node:crypto');
 const dbConfig = require('./dbConfig');
+const { registerTimelineRoutes } = require('./timelineRoutes');
 const { registerClinicalRoutes, lockAppointment } = require('./clinicalRoutes');
 
 const app = express();
@@ -130,6 +131,7 @@ function sendValidationError(res, missingFields) {
 }
 
 registerClinicalRoutes(app, oracledb, dbConfig, safeError);
+registerTimelineRoutes(app);
 
 app.get('/', (req, res) => {
     res.json({

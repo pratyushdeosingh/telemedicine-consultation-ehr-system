@@ -1,6 +1,6 @@
 # D.A. 3 CQL query guide
 
-This guide explains the local Cassandra examples in `cassandra/queries.cql`. The initial dataset has eight synthetic rows; Oracle import and website integration are later stages.
+This guide explains the local Cassandra examples in `cassandra/queries.cql`. The initial dataset has eight synthetic rows; Oracle import and website integration are now implemented; the original eight seed examples remain available.
 
 ## Keyspace and table
 
@@ -87,3 +87,17 @@ This removes only the teaching row. A subsequent select of the demonstration par
 The examples intentionally avoid `ALLOW FILTERING`, secondary indexes, and advanced transaction features. `DESCRIBE` is a shell command, and the commands in `setup.ps1` are Docker/PowerShell setup operations, not CQL database queries.
 
 `DESCRIBE TABLE` also prints Cassandra-generated storage defaults. Those are not extra features we implemented; use `cassandra/schema.cql` for the short authored schema and explain the keys and ordering first.
+
+## Application read query
+
+The backend uses a prepared query with the same partition conditions:
+
+```cql
+SELECT event_time, event_id, event_type, patient_name, appointment_id, summary, source_record_id
+FROM care_continuum.clinical_events_by_patient_month
+WHERE patient_id = ? AND event_month = ?;
+```
+
+The question marks are bound values, not string-concatenated input. The driver fetches a page of rows; the API signs its continuation token and the website offers Load More when another page exists. This is application paging, not an additional database model.
+
+The import uses `INSERT ... VALUES (?, ..., ?)` with the same complete primary key each run. Records are read from Oracle with familiar joins and `TO_CHAR` for calendar dates. Source records are not changed, and Cassandra inserts do not commit as part of an Oracle transaction.

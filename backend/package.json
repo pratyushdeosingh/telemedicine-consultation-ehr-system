@@ -12,15 +12,19 @@
     "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
     "db:telemedicine-trigger": "node scripts/runSqlFile.js ../database/telemedicine_session_trigger.sql",
     "auth:generate": "node scripts/generateDemoSecrets.js",
-    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js",
+    "check": "node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js && node --check cassandraConfig.js && node --check timelineModel.js && node --check timelineImport.js && node --check timelineRoutes.js && node --check scripts/importTimeline.js && node --check scripts/verifyTimeline.js && node --check scripts/setupTimeline.js",
     "test": "npm run check && node --test tests/*.test.js",
-    "db:verify-workflows": "node scripts/verifyClinicalWorkflows.js"
+    "db:verify-workflows": "node scripts/verifyClinicalWorkflows.js",
+    "timeline:import": "node scripts/importTimeline.js",
+    "timeline:verify": "node scripts/verifyTimeline.js",
+    "timeline:setup": "node scripts/setupTimeline.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "cassandra-driver": "4.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

@@ -4,14 +4,14 @@ A telemedicine and electronic health record application built with React, Expres
 
 [Live demo](https://telemedicine-consultation-ehr-syste.vercel.app/) · [API reference](backend/README.md) · [Deployment guide](deploy/VERCEL.md)
 
-The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete. D.A. 3 development has started with [local Apache Cassandra setup](cassandra/README.md); Oracle import, the website timeline, and hosted Cassandra integration are subsequent stages.
+The deployed application requires a shared demo password and uses synthetic records. The D.A. 2 implementation is complete. The D.A. 3 extension is implemented and verified locally: an explicit Oracle import populates a Cassandra-backed patient timeline. Hosted Cassandra connection support is prepared; cloud deployment is pending. See [local setup](cassandra/README.md) and [cloud deployment](deploy/CASSANDRA.md).
 
 ## Features
 
 | Area | Capabilities |
 | --- | --- |
 | Patients | Search the directory, register patients, and open their medical history |
-| Medical history | Record dated diagnoses, select known medicine allergy classes, and retain other allergies separately |
+| Medical history | Record diagnoses/allergies and browse an imported Cassandra timeline by patient and month |
 | Appointments | Book virtual or in-person consultations and update appointment status |
 | Prescriptions | Review medicine items, dosage, duration, quantity, and cost; create a prescription with an allergy warning |
 | Laboratory | Search orders and results, order catalog tests, and record result values, remarks, and document references |
@@ -43,7 +43,7 @@ Writes commit after all related statements succeed and roll back on failure. Ora
 | Interface | React 19, React Router 7, CSS, Lucide icons |
 | Frontend tooling | Vite 8, pnpm, Oxlint |
 | API | Node.js 24, Express 5 |
-| Database | Oracle Database, SQL, PL/SQL, node-oracledb 7 |
+| Database | Oracle Database, SQL/PLSQL, node-oracledb 7; Apache Cassandra 5.0.9 locally with the Apache Node.js driver 4.10 |
 | Hosting | Vercel and Oracle Autonomous Database |
 
 ## Repository structure
@@ -149,6 +149,7 @@ From `backend/`:
 ```powershell
 npm test
 npm run db:verify-workflows
+npm run timeline:verify
 ```
 
 `npm test` runs syntax and authentication checks. `db:verify-workflows` requires a working Oracle connection and exercises the real HTTP routes and database rules, including history/allergy validation, prescription rollback, lab operations, and invoice transitions. It rolls back all synthetic test changes.
@@ -166,6 +167,19 @@ Additional database evidence commands are available from `backend/`:
 npm run db:queries
 npm run db:test-trigger
 ```
+
+## Cassandra timeline
+
+Start and initialize the local service using [cassandra/README.md](cassandra/README.md), then set `CASSANDRA_ENABLED=true` and the local connection fields from `backend/.env.example` in `backend/.env`. Restart the backend. From `backend/`:
+
+```powershell
+npm run timeline:import
+npm run timeline:verify
+```
+
+The import reads Oracle without modifying its data, writes stable Cassandra keys, and reports partial failures. Re-run it after Oracle changes. Open Medical History, select a patient, and choose a month. The timeline is read from Cassandra, with paging, empty states, and isolated connection errors.
+
+The timeline is a dated record snapshot, not an immutable audit log or a source for allergy/billing decisions. Source deletion or date changes can leave stale timeline rows; automatic reconciliation is not implemented.
 
 ## Deployment
 

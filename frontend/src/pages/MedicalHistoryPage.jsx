@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { EmptyState, ErrorState, LoadingState } from '../components/DataState.jsx'
 import { EntryForm } from '../components/EntryForm.jsx'
+import { PatientTimeline } from '../components/PatientTimeline.jsx'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { Surface } from '../components/Surface.jsx'
 import { useApiResource } from '../hooks/useApiResource.js'
@@ -14,6 +16,7 @@ async function loadHistory() {
 const initial = { patient_id: '', log_date: '', diagnosis: '', known_allergies: [], other_allergies: '', attachment_path: '' }
 
 export function MedicalHistoryPage() {
+  const [today] = useState(() => new Date())
   const [params, setParams] = useSearchParams()
   const selected = params.get('patient') ?? ''
   const { data, isLoading, isError, error, reload } = useApiResource(loadHistory, { patients: [], logs: [], allergies: [], medicines: [] })
@@ -21,6 +24,8 @@ export function MedicalHistoryPage() {
   const allergies = [...new Set(data.allergies.filter((item) => !selected || item.patient_id === selected).map((item) => item.allergy_name))]
   const classes = [...new Set(data.medicines.map((item) => item.allergen_class?.trim().toUpperCase()).filter(Boolean))].sort()
   const matchesCatalog = (value) => classes.includes(value.trim().toUpperCase())
+  const monthParts = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', timeZone: 'Asia/Kolkata' }).formatToParts(new Date(logs[0]?.log_date || today))
+  const defaultMonth = `${monthParts.find((part) => part.type === 'year').value}-${monthParts.find((part) => part.type === 'month').value}`
   return <main className="page">
     <PageHeader eyebrow="Patient records" title="Medical history" description="Review diagnoses and recorded allergies, or add a dated history entry." />
     {isLoading && <LoadingState label="Loading medical history" />}
@@ -39,6 +44,7 @@ export function MedicalHistoryPage() {
           {log.attachment_path && <small className="document-reference">Attachment reference: {log.attachment_path}</small>}
         </article>)}</div>
       </Surface>
+      <PatientTimeline key={selected} patientId={selected} defaultMonth={defaultMonth} />
       <EntryForm key={selected} title="Add medical history" description="Record a diagnosis and any known allergies together. Earlier entries remain available."
         initial={{ ...initial, patient_id: selected }} buttonLabel="Save history entry"
         fields={[

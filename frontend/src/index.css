@@ -580,3 +580,7 @@ a { color: inherit; text-decoration: none; }
 
 .record-form select[multiple] { min-height: 5rem; padding: 0.5rem; }
 .field-help { font-size: 0.75rem; line-height: 1.5; color: var(--ink-650); }
+
+.status-editor input[type="month"] { padding: 0.6rem; border: 1px solid var(--line); border-radius: 0.6rem; background: white; font: inherit; min-width: 0; }
+.timeline-note, .timeline-footer { padding: 0.8rem 1rem; color: var(--ink-650); font-size: 0.8rem; line-height: 1.6; }
+.timeline-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.7rem; }

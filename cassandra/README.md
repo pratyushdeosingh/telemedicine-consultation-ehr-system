@@ -1,6 +1,6 @@
 # Local Apache Cassandra
 
-The first D.A. 3 stage runs actual Apache Cassandra 5.0.9 in Docker. It creates a single-node cluster, a persistent data volume, and a small synthetic timeline dataset. Oracle and the deployed website are unchanged by these commands.
+The local D.A. 3 setup runs actual Apache Cassandra 5.0.9 in Docker. It creates a single-node cluster, a persistent data volume, and a small synthetic timeline dataset. Oracle and the deployed website are unchanged by these commands.
 
 The CQL port is published only at `127.0.0.1:9042`. This configuration is for local development and does not configure production authentication. The container has a 3 GB memory limit and a 1 GB Java heap. Docker Desktop's Linux engine must be running.
 
@@ -74,6 +74,10 @@ docker compose -f cassandra/compose.yaml ps
 
 Stopping preserves the data. `docker compose down` also preserves the named volume, but **do not use `down -v` unless you intend to delete Cassandra data**.
 
-## Next stages
+## Application integration
 
-Oracle import, backend driver/API integration, website timeline, and hosted deployment are separate stages described in [the implementation plan](../docs/DA3_IMPLEMENTATION_PLAN.md). Vercel cannot connect to this laptop-local container.
+With the backend's local Cassandra settings enabled, run `npm run timeline:import` from `backend/` to import Oracle records. `npm run timeline:verify` checks source parity and paging; `npm run timeline:verify -- --outage` also verifies that stopping Cassandra does not break Oracle reads.
+
+The Medical History page now includes the timeline. Select a patient and month (for example, PAT-01 and September 2026). The View timeline button re-reads Cassandra; it does not trigger an import.
+
+Hosted deployment still requires a remote database and credentials; see [the cloud guide](../deploy/CASSANDRA.md). Vercel cannot connect to this laptop-local container.

@@ -76,4 +76,4 @@ Observed verification: all workflow checks passed against the configured Oracle 
 
 Release these changes by committing and pushing to the GitHub production branch after verification. They do not require database setup or new environment variables. Validate the production deployment and direct navigation to `/medical-history` and `/laboratory` after the Vercel build. Never run `db:setup` to release these changes.
 
-D.A. 3 / Cassandra implementation is intentionally deferred until this stage is reviewed.
+This guide covers the Oracle D.A. 2 workflows. The Cassandra extension has separate D.A. 3 setup, comparison, query, and demonstration guides.
