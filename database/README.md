@@ -32,3 +32,23 @@ npm run db:test-trigger
 ```
 
 The upgrade retains existing patients and appointments while adding the allergen metadata and safety trigger.
+
+## Academic record minimum
+
+Run `npm run db:seed-academic` from `backend` to add 17 linked synthetic teaching
+examples to each of the 18 Oracle tables without removing existing records.
+Starting from the original seed, each table has 25 rows (26 for medicine and
+prescription items). Existing databases can have higher totals. The script
+validates all 18 tables have at least 25 rows before committing and prints every
+table's count. Run it through the supplied npm command for rollback on failure.
+
+Synthetic IDs use the reserved `-S01` through `-S17` suffixes. Repeating the seed
+does not duplicate these records. Virtual appointments reuse the session created
+by the existing trigger. New invoice totals match their medicine and lab costs;
+synthetic medicines, doses, and results are labelled teaching examples.
+No real report files or working meeting rooms are implied by these examples.
+
+The full `telemedicine_ehr.sql` setup includes the same expansion, so fresh setups
+also satisfy the minimum. `npm run db:generate-academic-seed` regenerates both SQL
+copies from `scripts/generateAcademicSeed.js`. After seeding, use
+`npm run timeline:import` to refresh the Cassandra timeline from Oracle.

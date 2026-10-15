@@ -7,6 +7,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:setup": "node scripts/setupDatabase.js",
+    "db:seed-academic": "node scripts/runSqlFile.js ../database/academic_seed.sql",
+    "db:generate-academic-seed": "node scripts/generateAcademicSeed.js",
     "db:upgrade-da2": "node scripts/runSqlFile.js ../database/da2_upgrade.sql",
     "db:queries": "node scripts/runSqlFile.js ../database/queries.sql",
     "db:test-trigger": "node scripts/runSqlFile.js ../database/trigger_demo.sql",
