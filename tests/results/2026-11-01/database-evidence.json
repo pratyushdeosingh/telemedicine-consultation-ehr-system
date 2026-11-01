@@ -1,0 +1,172 @@
+{
+  "captured_date": "2026-11-01",
+  "captured_at": "2026-11-01T17:24:50.637Z",
+  "oracle_versions": [
+    [
+      "Oracle AI Database 26ai Enterprise Edition ",
+      "23.26.4.1.0"
+    ]
+  ],
+  "triggers": [
+    [
+      "PREVENT_ALLERGIC_PRESCRIPTION",
+      "ENABLED",
+      "VALID"
+    ],
+    [
+      "TRG_CREATE_TELEMEDICINE_SESSION",
+      "ENABLED",
+      "VALID"
+    ]
+  ],
+  "browser_rejected_prescription_count": 0,
+  "automatic_sessions": [
+    [
+      "APT-17",
+      "SES-17",
+      "Session created automatically"
+    ],
+    [
+      "APT-18",
+      "SES-18",
+      "Session created automatically"
+    ],
+    [
+      "APT-22",
+      "SES-22",
+      "Session created automatically"
+    ],
+    [
+      "APT-24",
+      "SES-24",
+      "Session created automatically"
+    ]
+  ],
+  "schema": [
+    {
+      "column_name": "appointment_id",
+      "kind": "regular",
+      "position": -1,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "event_id",
+      "kind": "clustering",
+      "position": 1,
+      "type": "text",
+      "clustering_order": "asc"
+    },
+    {
+      "column_name": "event_month",
+      "kind": "partition_key",
+      "position": 1,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "event_time",
+      "kind": "clustering",
+      "position": 0,
+      "type": "timestamp",
+      "clustering_order": "desc"
+    },
+    {
+      "column_name": "event_type",
+      "kind": "regular",
+      "position": -1,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "patient_id",
+      "kind": "partition_key",
+      "position": 0,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "patient_name",
+      "kind": "regular",
+      "position": -1,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "source_record_id",
+      "kind": "regular",
+      "position": -1,
+      "type": "text",
+      "clustering_order": "none"
+    },
+    {
+      "column_name": "summary",
+      "kind": "regular",
+      "position": -1,
+      "type": "text",
+      "clustering_order": "none"
+    }
+  ],
+  "cql": "SELECT event_time,event_type,summary FROM care_continuum.clinical_events_by_patient_month WHERE patient_id = ? AND event_month = ? LIMIT 5",
+  "query_parameters": [
+    "PAT-01",
+    "2026-09"
+  ],
+  "events": [
+    {
+      "event_time": "2026-09-11T00:00:00.000Z",
+      "event_type": "LAB_RESULT",
+      "summary": "Lipid Profile: Total Cholesterol: 190 mg/dL · Normal range"
+    },
+    {
+      "event_time": "2026-09-10T00:00:00.000Z",
+      "event_type": "APPOINTMENT",
+      "summary": "Virtual consultation · Dr. Sundaram Krishnan · Completed"
+    },
+    {
+      "event_time": "2026-09-10T00:00:00.000Z",
+      "event_type": "INVOICE",
+      "summary": "Invoice INV-01 · INR 1560.00 · Current status: Paid"
+    },
+    {
+      "event_time": "2026-09-10T00:00:00.000Z",
+      "event_type": "LAB_ORDER",
+      "summary": "Lipid Profile · Routine"
+    },
+    {
+      "event_time": "2026-09-10T00:00:00.000Z",
+      "event_type": "PRESCRIPTION",
+      "summary": "Paracetamol (650mg As needed); Atorvastatin (10mg Once Daily)"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "http_status": 200,
+      "events": 2,
+      "has_next_page": true
+    },
+    {
+      "page": 2,
+      "http_status": 200,
+      "events": 2,
+      "has_next_page": true
+    },
+    {
+      "page": 3,
+      "http_status": 200,
+      "events": 1,
+      "has_next_page": false
+    }
+  ],
+  "invalid_month": {
+    "status": 400,
+    "body": {
+      "error": "Choose a valid month (YYYY-MM)"
+    }
+  },
+  "empty_partition": {
+    "status": 200,
+    "event_count": 0
+  }
+}

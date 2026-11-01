@@ -1,6 +1,6 @@
 # Frontend
 
-React/Vite interface for Care Continuum, with seven pages: Overview, Patients, Medical History, Laboratory, Appointments, Prescriptions, and Billing.
+React/Vite interface for Care Continuum, with eight pages: Overview, Patients, Medical History, Cassandra Timeline, Laboratory, Appointments, Prescriptions, and Billing.
 
 See the [project README](../README.md#run-locally) for full setup. From this directory:
 

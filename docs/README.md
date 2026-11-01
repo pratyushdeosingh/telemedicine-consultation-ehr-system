@@ -1,23 +1,33 @@
-# Documentation
+# System and database design
 
-| Document | Purpose |
-| --- | --- |
-| [design/README.md](design/README.md) | Final ER diagram, relational schema, and normalization evidence handoff |
-| [testing/README.md](testing/README.md) | Dated expected/actual test results and evidence handoff |
-| [Report handoff](../report/README.md) | Location and naming for the final technical report |
-| [Presentation handoff](../presentation/README.md) | Location and naming for the final slide deck |
-| [DA3_IMPLEMENTATION_PLAN.md](DA3_IMPLEMENTATION_PLAN.md) | D.A. 3 scope, stages, student responsibilities, and release checks |
-| [DA3_SETUP_RECORD.md](DA3_SETUP_RECORD.md) | Local Cassandra version, sample data, and verified query/persistence results |
-| [DA3_COMPARISON.md](DA3_COMPARISON.md) | Oracle/Cassandra comparison and synchronization limits |
-| [DA3_DEMO_CHECKLIST.md](DA3_DEMO_CHECKLIST.md) | Verified features, remaining academic deliverables, and report/demo outline |
-| [DA3_QUERY_GUIDE.md](DA3_QUERY_GUIDE.md) | Simple explanations of the local Cassandra model and CQL examples |
-| [DA3_STUDY_GUIDE.md](DA3_STUDY_GUIDE.md) | Database explanations, syllabus mapping, report outline, and presentation rehearsal |
-| [DA3_WEBSITE_ENHANCEMENT_PLAN.md](DA3_WEBSITE_ENHANCEMENT_PLAN.md) | Dedicated Cassandra page, connection indicators, website refresh, and verification scope |
-| [DA2_COMPLETION.md](DA2_COMPLETION.md) | Current workflow rules, query explanations, verification, and demonstration steps |
-| [DA2_CHECKLIST.md](DA2_CHECKLIST.md) | Database implementation and report-evidence checklist |
-| [DA2_REPORT_DRAFT.md](DA2_REPORT_DRAFT.md) | Technical source material for the handwritten report |
-| [DEPLOYMENT_STUDY_RECORD.md](DEPLOYMENT_STUDY_RECORD.md) | Historical deployment decisions and dated verification evidence |
+- [Architecture](architecture.md): application/database connections, transactions, timeline refresh and deployment.
+- [Relational schema](relational-schema.md): all 18 Oracle relations, primary/foreign keys, constraints and routines.
+- [Normalization](normalization.md): initial relation, functional dependencies and decomposition through 3NF.
+- [Complete ER source](er-diagram.mmd): implemented columns and key annotations.
 
-Use the [project README](../README.md) for current setup and the [Vercel guide](../deploy/VERCEL.md) for deployment. Historical entries describe the state at their recorded date, not necessarily the current application.
+## ER diagram
 
-Keep passwords, wallet material, and real patient information out of documentation and screenshots.
+This relationship overview follows the implemented SQL schema. A circle at a parent end indicates a nullable reference in the child; crow's feet indicate multiple child rows. Solid lines identify relationships whose FK columns form part of the child's PK; dashed lines represent other references. Notation follows the [Mermaid ER syntax](https://mermaid.js.org/syntax/entityRelationshipDiagram.html). The complete column/key definitions are in the schema reference above.
+
+```mermaid
+erDiagram
+    INSURANCE_PROVIDER |o..o{ PATIENT : "Policy_No"
+    DEPARTMENT ||..o{ DOCTOR : "Dept_ID"
+    PATIENT ||--o{ PATIENT_PHONE : "Patient_ID"
+    DOCTOR ||--o{ DOCTOR_QUALIFICATION : "Doctor_ID"
+    PATIENT ||--o{ MEDICAL_LOG : "Patient_ID"
+    MEDICAL_LOG ||--o{ LOG_ALLERGIES : "Patient_ID, Log_Seq_No"
+    PATIENT ||..o{ APPOINTMENT : "Patient_ID"
+    DOCTOR ||..o{ APPOINTMENT : "Doctor_ID"
+    APPOINTMENT ||--o{ TELEMEDICINE_SESSION : "Appointment_ID"
+    APPOINTMENT ||--o{ PRESCRIPTION : "Appointment_ID"
+    PHARMACY |o..o{ PRESCRIPTION : "Pharmacy_ID"
+    PRESCRIPTION ||--o{ PRESCRIPTION_ITEM : "Appointment_ID, Prescription_No"
+    MEDICINE ||..o{ PRESCRIPTION_ITEM : "Medicine_ID"
+    APPOINTMENT ||..o{ LAB_ORDER : "Appointment_ID"
+    LAB_TEST_CATALOG ||..o{ LAB_ORDER : "Test_Catalog_ID"
+    LAB_ORDER ||--o{ TEST_RESULT : "Order_ID"
+    APPOINTMENT ||--o{ BILLING_INVOICE : "Appointment_ID"
+```
+
+Cassandra's separate patient/month read model and deliberate denormalization are explained in the architecture and normalization documents. Application/database evidence is indexed in [screenshots/](../screenshots/README.md), with expected/actual checks in [tests/](../tests/README.md).

@@ -21,4 +21,10 @@ Thumbs.db
 # Oracle/local runtime files
 *.dbf
 *.ora
+*.pem
+*.p12
+*.jks
+Wallet_*/
+secure-connect*.zip
+.pnpm-store/
 

@@ -1,0 +1,147 @@
+erDiagram
+    INSURANCE_PROVIDER {
+        VARCHAR2 Policy_No PK
+        VARCHAR2 Provider_Name
+        NUMBER Coverage_Limit
+    }
+    DEPARTMENT {
+        VARCHAR2 Dept_ID PK
+        VARCHAR2 Dept_Name
+        VARCHAR2 Location_Block
+    }
+    PHARMACY {
+        VARCHAR2 Pharmacy_ID PK
+        VARCHAR2 Pharmacy_Name
+        VARCHAR2 Location
+        VARCHAR2 Contact_Number
+    }
+    MEDICINE {
+        VARCHAR2 Medicine_ID PK
+        VARCHAR2 Medicine_Name
+        VARCHAR2 Manufacturer
+        VARCHAR2 Dosage_Form
+        VARCHAR2 Allergen_Class
+        NUMBER Unit_Price
+    }
+    LAB_TEST_CATALOG {
+        VARCHAR2 Test_Catalog_ID PK
+        VARCHAR2 Test_Name
+        VARCHAR2 Category
+        NUMBER Standard_Cost
+    }
+    PATIENT {
+        VARCHAR2 Patient_ID PK
+        VARCHAR2 Policy_No FK
+        VARCHAR2 First_Name
+        VARCHAR2 Last_Name
+        VARCHAR2 Street
+        VARCHAR2 City
+        VARCHAR2 State
+        VARCHAR2 Zip_Code
+        DATE DOB
+        VARCHAR2 Gender
+        VARCHAR2 Emergency_Contact
+    }
+    DOCTOR {
+        VARCHAR2 Doctor_ID PK
+        VARCHAR2 Dept_ID FK
+        VARCHAR2 First_Name
+        VARCHAR2 Last_Name
+        VARCHAR2 Specialization
+        VARCHAR2 Email UK
+        VARCHAR2 Primary_Phone
+    }
+    PATIENT_PHONE {
+        VARCHAR2 Patient_ID PK,FK
+        VARCHAR2 Phone_Number PK
+    }
+    DOCTOR_QUALIFICATION {
+        VARCHAR2 Doctor_ID PK,FK
+        VARCHAR2 Qualification PK
+    }
+    MEDICAL_LOG {
+        VARCHAR2 Patient_ID PK,FK
+        NUMBER Log_Seq_No PK
+        DATE Log_Date
+        VARCHAR2 Diagnosis
+        VARCHAR2 Attachment_Path
+    }
+    LOG_ALLERGIES {
+        VARCHAR2 Patient_ID PK,FK
+        NUMBER Log_Seq_No PK,FK
+        VARCHAR2 Allergy_Name PK
+    }
+    APPOINTMENT {
+        VARCHAR2 Appointment_ID PK
+        VARCHAR2 Patient_ID FK
+        VARCHAR2 Doctor_ID FK
+        DATE Appointment_Date
+        VARCHAR2 Appointment_Time
+        VARCHAR2 Status
+        VARCHAR2 Consultation_Mode
+        VARCHAR2 Meeting_Link
+    }
+    TELEMEDICINE_SESSION {
+        VARCHAR2 Appointment_ID PK,FK
+        VARCHAR2 Session_ID PK
+        TIMESTAMP Start_Time
+        TIMESTAMP End_Time
+        VARCHAR2 Network_Quality_Log
+        VARCHAR2 Chat_Transcript_URL
+    }
+    PRESCRIPTION {
+        VARCHAR2 Appointment_ID PK,FK
+        VARCHAR2 Prescription_No PK
+        VARCHAR2 Pharmacy_ID FK
+        DATE Issue_Date
+        VARCHAR2 Notes
+    }
+    PRESCRIPTION_ITEM {
+        VARCHAR2 Appointment_ID PK,FK
+        VARCHAR2 Prescription_No PK,FK
+        NUMBER Item_Seq_No PK
+        VARCHAR2 Medicine_ID FK
+        VARCHAR2 Dosage
+        NUMBER Duration_Days
+        NUMBER Quantity
+    }
+    LAB_ORDER {
+        VARCHAR2 Order_ID PK
+        VARCHAR2 Appointment_ID FK
+        VARCHAR2 Test_Catalog_ID FK
+        DATE Order_Date
+        VARCHAR2 Priority
+    }
+    TEST_RESULT {
+        VARCHAR2 Order_ID PK,FK
+        NUMBER Result_Seq_No PK
+        VARCHAR2 Result_Value
+        DATE Report_Date
+        VARCHAR2 Technician_Remarks
+        VARCHAR2 Document_URL
+        VARCHAR2 File_Format
+    }
+    BILLING_INVOICE {
+        VARCHAR2 Appointment_ID PK,FK
+        VARCHAR2 Invoice_No PK
+        DATE Billing_Date
+        NUMBER Total_Amount
+        VARCHAR2 Payment_Status
+    }
+    INSURANCE_PROVIDER |o..o{ PATIENT : "Policy_No"
+    DEPARTMENT ||..o{ DOCTOR : "Dept_ID"
+    PATIENT ||--o{ PATIENT_PHONE : "Patient_ID"
+    DOCTOR ||--o{ DOCTOR_QUALIFICATION : "Doctor_ID"
+    PATIENT ||--o{ MEDICAL_LOG : "Patient_ID"
+    MEDICAL_LOG ||--o{ LOG_ALLERGIES : "Patient_ID, Log_Seq_No"
+    PATIENT ||..o{ APPOINTMENT : "Patient_ID"
+    DOCTOR ||..o{ APPOINTMENT : "Doctor_ID"
+    APPOINTMENT ||--o{ TELEMEDICINE_SESSION : "Appointment_ID"
+    APPOINTMENT ||--o{ PRESCRIPTION : "Appointment_ID"
+    PHARMACY |o..o{ PRESCRIPTION : "Pharmacy_ID"
+    PRESCRIPTION ||--o{ PRESCRIPTION_ITEM : "Appointment_ID, Prescription_No"
+    MEDICINE ||..o{ PRESCRIPTION_ITEM : "Medicine_ID"
+    APPOINTMENT ||..o{ LAB_ORDER : "Appointment_ID"
+    LAB_TEST_CATALOG ||..o{ LAB_ORDER : "Test_Catalog_ID"
+    LAB_ORDER ||--o{ TEST_RESULT : "Order_ID"
+    APPOINTMENT ||--o{ BILLING_INVOICE : "Appointment_ID"

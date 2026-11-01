@@ -1,0 +1,12 @@
+PASS: allergy trigger enabled and valid
+PASS: website phone arrays, insurance join/selector, qualifications and virtual session trigger/readback
+PASS: history, allergies, catalog and appointment patient identity
+PASS: known classes validated; other allergies stored; duplicate/case normalization
+PASS: history and allergy transaction; invalid date rejected
+Error: ORA-20002: Allergy conflict: Amoxicillin belongs to allergen class Penicillin for patient PAT-01
+ORA-06512: at "TELEMEDICINE_APP.PREVENT_ALLERGIC_PRESCRIPTION", line 25
+ORA-04088: error during execution of trigger 'TELEMEDICINE_APP.PREVENT_ALLERGIC_PRESCRIPTION'
+PASS: real allergy trigger returns HTTP 409; header and earlier safe item rolled back
+PASS: safe prescription, lab order and test result persist within transaction
+PASS: calculated billing, duplicate protection, recalculation, payment/refund transitions and settled-charge protection
+PASS: all synthetic verification changes rolled back; no test records retained

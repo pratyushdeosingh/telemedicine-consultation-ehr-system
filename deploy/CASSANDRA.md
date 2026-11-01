@@ -2,9 +2,7 @@
 
 Status: Astra DB Free is Active and its connection, 55-event import, repeat-import idempotency, source parity, and real API paging/validation/health checks passed on 11 October 2026. The D.A. 3 release is deployed on Vercel; authenticated browser checks confirmed the timeline, month switching, empty months, and existing Oracle laboratory/billing pages. Unauthenticated Oracle and timeline endpoints return 401.
 
-## Student steps for Astra DB
-
-If Astra is accepted for the hosted demonstration:
+## Create and configure Astra DB
 
 1. Sign in or create an account at [Astra](https://astra.datastax.com/). Complete account verification and accept any terms yourself.
 2. Keep the Free plan. Create a **Serverless (non-vector)** database named `care-continuum-da3`, with the first keyspace named `care_continuum`.
@@ -15,7 +13,7 @@ If Astra is accepted for the hosted demonstration:
 
 The managed provider controls the server/replication configuration. It is accurately described as Astra DB, powered by Cassandra, rather than a self-administered Apache Cassandra VM.
 
-The current account offered AWS Ohio (`us-east-2`) as its unlocked Free region for the non-vector database. The initial custom role, `care-continuum-da3-import`, grants only **Describe Keyspace**, **Select Table**, **Modify Table**, **Describe Table**, **Create Table**, and **Access CQL**, scoped to this database's `care_continuum` keyspace. Modify Table includes record deletion; the import code only upserts mapped synthetic records. Its token expires on **9 January 2027** and must be replaced before that date if still used. Tokens and connection bundles are never part of the repository.
+Keep application tokens scoped to the project keyspace with the permissions needed for table setup and timeline reads/writes. Keep tokens and connection bundles outside Git.
 
 Official instructions: [database creation](https://docs.datastax.com/en/astra-db-serverless/databases/create-database.html), [application tokens](https://docs.datastax.com/en/astra-db-serverless/administration/manage-application-tokens.html), [driver connections](https://docs.datastax.com/en/astra-db-serverless/drivers/nodejs-driver.html).
 
@@ -64,10 +62,10 @@ Vercel builds after changes are pushed to `main`; deployment itself does not cre
 
 The website has a 2,000-row limit per Oracle source query and a 2,000-event limit after mapping. A 120-second budget stops dispatching further Cassandra writes; in-flight queries are awaited. The function's `maxDuration` is set to 180 seconds. The existing Fluid Compute configuration permits that duration on Hobby; see [Vercel's duration documentation](https://vercel.com/docs/functions/configuring-functions/duration). Do not disable Fluid Compute without reviewing its different legacy limits. No plan upgrade is required by this setting.
 
-Authentication and production origin checks protect refresh. Overlap is rejected inside one backend instance, not across multiple scaled instances. Prepared upserts use stable keys, partial writes remain retryable, and source deletions/date changes are not reconciled automatically. Check both availability and the displayed refresh outcome before the presentation.
+Authentication and production origin checks protect refresh. Overlap is rejected inside one backend instance, not across multiple scaled instances. Prepared upserts use stable keys, partial writes remain retryable, and source deletions/date changes are not reconciled automatically. Check both availability and the displayed refresh outcome before use.
 
 ## Free-plan limits and fallback
 
-Astra's Free plan provides monthly credits and restricted regions; databases are suspended if those credits are exhausted. Check the current account allowance and usage before the demonstration. No paid upgrade is part of this setup.
+Astra's Free plan provides monthly credits and restricted regions; databases are suspended if those credits are exhausted. Check the current account allowance and usage before use. No paid upgrade is part of this setup.
 
 To disable only the hosted timeline, set `CASSANDRA_ENABLED=false` in Vercel and redeploy. Existing Oracle functionality remains available. Do not remove the Oracle environment variables or run `db:setup` to troubleshoot Cassandra.

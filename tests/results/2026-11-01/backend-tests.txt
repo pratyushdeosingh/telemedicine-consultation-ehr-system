@@ -1,0 +1,29 @@
+
+> telemedicine-api@1.0.0 test
+> npm run check && node --test tests/*.test.js
+
+
+> telemedicine-api@1.0.0 check
+> node --check server.js && node --check scripts/setupDatabase.js && node --check scripts/runSqlFile.js && node --check clinicalRoutes.js && node --check scripts/verifyClinicalWorkflows.js && node --check cassandraConfig.js && node --check timelineModel.js && node --check timelineImport.js && node --check timelineRoutes.js && node --check scripts/importTimeline.js && node --check scripts/verifyTimeline.js && node --check scripts/setupTimeline.js && node --check timelineRefresh.js && node --check scripts/verifyWebsiteRefresh.js
+
+✔ demo API requires login and rejects a foreign origin (265.605ms)
+✔ Vercel API wrapper routes the session endpoint (24.2384ms)
+✔ source dates preserve calendar month across host time zones (4.2124ms)
+✔ mapping keeps composite source identities and groups medicine rows (1.5862ms)
+✔ partition and cursor validation reject forged or cross-query paging (3.3722ms)
+✔ Vercel configuration never falls back to laptop-local Cassandra (2.7449ms)
+✔ partial import reports a retryable failure without losing successful writes (2.9134ms)
+✔ timeline failure remains isolated and invalid input does not query Cassandra (119.3403ms)
+✔ refresh closes the read-only snapshot, reports partial results, and retains the shared Cassandra client (5.451ms)
+✔ overlap is rejected, and read errors/size limits release the connection and running guard (2.6407ms)
+✔ bounded Oracle reads reject truncation and expired deadlines (1.0609ms)
+✔ bounded writes stop new work after the deadline and constrain concurrent queries (15.6547ms)
+✔ HTTP import distinguishes partial, disabled, overlap, and sanitized connection failures (134.9515ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1252.1953

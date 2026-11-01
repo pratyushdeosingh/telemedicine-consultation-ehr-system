@@ -1,0 +1,5 @@
+Oracle: Oracle AI Database 26ai Enterprise Edition  23.26.4.1.0
+PASS: both Oracle triggers ENABLED / VALID; rejected browser prescription count = 0.
+PASS: Cassandra five-event partition read, descending order, three-page read without duplicate identities.
+PASS: invalid month returns HTTP 400; empty partition returns HTTP 200 with zero events.
+Read-only verification completed; no import, schema changes or data writes performed.

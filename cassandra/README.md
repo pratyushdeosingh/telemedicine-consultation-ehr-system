@@ -1,6 +1,6 @@
 # Local Apache Cassandra
 
-The local D.A. 3 setup runs actual Apache Cassandra 5.0.9 in Docker. It creates a single-node cluster, a persistent data volume, and a small synthetic timeline dataset. Oracle and the deployed website are unchanged by these commands.
+The local setup runs Apache Cassandra 5.0.9 in Docker, with a single-node cluster, persistent volume and synthetic timeline dataset. These setup commands do not modify Oracle or the deployed website.
 
 The CQL port is published only at `127.0.0.1:9042`. This configuration is for local development and does not configure production authentication. The container has a 3 GB memory limit and a 1 GB Java heap. Docker Desktop's Linux engine must be running.
 
@@ -49,7 +49,7 @@ docker compose -f cassandra/compose.yaml exec -T cassandra cqlsh -f /tmp/da3-que
 | `event_time` | First clustering column: sorts events newest first |
 | `event_id` | Second clustering column: distinguishes events with the same date/time |
 | `event_type`, `summary` | Information rendered in the website timeline |
-| `source_record_id`, `appointment_id` | References to an eventual Oracle source record |
+| `source_record_id`, `appointment_id` | References to the source record and appointment for imported events |
 
 The eight seed records cover two synthetic patients and three patient/month partitions. They are not imported from Oracle. Timestamps use explicit UTC values in this teaching dataset; imported Oracle calendar dates are mapped to UTC midnight to retain their source month.
 

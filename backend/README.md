@@ -15,6 +15,7 @@ All routes below use the `/api` prefix. Production data routes require a signed 
 | POST | `/logout` | Clear the session cookie |
 | GET | `/test-db` | Check Oracle connectivity |
 | GET | `/patients` | List patients |
+| GET | `/insurance-providers` | List insurance policies/providers for registration |
 | GET | `/doctors` | List doctors and departments |
 | GET | `/medicines` | List medicines, prices, and allergen classes |
 | GET | `/pharmacies` | List pharmacies |
@@ -49,7 +50,7 @@ History creation accepts `patient_id`, `log_date`, `diagnosis`, optional `attach
 
 Invoice creation accepts `appointment_id` and `billing_date`. The server calculates the amount; a client-supplied amount is not used. Invoice updates accept an `action` of `recalculate`, `pay`, or `refund`.
 
-See the [workflow guide](../docs/DA2_COMPLETION.md) for transaction behaviour and business rules.
+See the [architecture](../docs/architecture.md) for transaction behaviour and business rules.
 
 ## Response status
 
@@ -74,7 +75,7 @@ The workflow check requires Oracle and uses a temporary server with rolled-back 
 
 ## Cassandra commands
 
-`npm run timeline:setup` creates the table in an existing keyspace. `npm run timeline:import` reads Oracle and upserts timeline records. `npm run timeline:verify` checks both databases and paging; add `-- --outage` only for local Docker failure/recovery verification. See [cloud setup](../deploy/CASSANDRA.md) and the [comparison](../docs/DA3_COMPARISON.md).
+`npm run timeline:setup` creates the table in an existing keyspace. `npm run timeline:import` reads Oracle and upserts timeline records. `npm run timeline:verify` checks both databases and paging; add `-- --outage` only for local Docker failure/recovery verification. See [cloud setup](../deploy/CASSANDRA.md) and [architecture](../docs/architecture.md).
 
 Normal users refresh from the Cassandra Timeline page. The protected POST endpoint uses `timelineRefresh.js`, shared with the CLI, and returns `attempted` (the source events targeted), `written`, `failed`, `status`, `partitions`, and `completed_at`, plus `timed_out` when its write budget expires. It keeps the shared Cassandra client alive and closes its Oracle snapshot connection. No schema creation runs through the website. No failed source read writes to Cassandra. Completion does not remove stale rows after source deletion/date changes.
 

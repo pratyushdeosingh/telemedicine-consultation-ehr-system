@@ -1,5 +1,5 @@
-# Final technical report
+# Technical report
 
-Person 2: place the completed report PDF here as `DBMS_Project_Report.pdf` after checking the faculty template. This folder currently contains no final report.
+Final artifact: `DBMS_Project_Report.pdf` (not yet added).
 
-The separate Word submission document must contain the course/team details and working repository and YouTube links required by the final instructions.
+Supporting [database design](../docs/README.md), [test results](../tests/README.md) and [screenshots](../screenshots/README.md) are included in the repository.
