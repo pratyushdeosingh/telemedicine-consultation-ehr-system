@@ -2,8 +2,6 @@
 
 | Document | Purpose |
 | --- | --- |
-| [FINAL_SUBMISSION_PLAN.md](FINAL_SUBMISSION_PLAN.md) | Final submission checklist, team video timing, and Pratyush's deployed-application shot list |
-| [PRATYUSH_RECORDING_RUNBOOK.md](PRATYUSH_RECORDING_RUNBOOK.md) | Exact demo inputs/actions, two trigger demonstrations, billing rules, SQL evidence and recording cues |
 | [design/README.md](design/README.md) | Final ER diagram, relational schema, and normalization evidence handoff |
 | [testing/README.md](testing/README.md) | Dated expected/actual test results and evidence handoff |
 | [Report handoff](../report/README.md) | Location and naming for the final technical report |

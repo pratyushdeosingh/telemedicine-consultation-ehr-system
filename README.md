@@ -328,7 +328,7 @@ telemedicine-ehr-da2/
 
 The directory name retains the D.A. 2 origin; the repository contains both the completed Oracle application and its D.A. 3 extension.
 
-For the final submission, use the [submission and video plan](docs/FINAL_SUBMISSION_PLAN.md). The [design](docs/design/README.md), [test evidence](docs/testing/README.md), [report](report/README.md), and [presentation](presentation/README.md) folders describe the remaining artifact handoffs; their presence does not mean those final artifacts have been added. Automated tests remain in `backend/tests/`. The existing `backend/` and `frontend/` folders contain the application source.
+The [design](docs/design/README.md), [test evidence](docs/testing/README.md), [report](report/README.md), and [presentation](presentation/README.md) folders describe the remaining artifact handoffs; their presence does not mean those final artifacts have been added. Automated tests remain in `backend/tests/`. The existing `backend/` and `frontend/` folders contain the application source.
 
 ## Run locally
 
