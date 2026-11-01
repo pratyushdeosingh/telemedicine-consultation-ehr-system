@@ -2,6 +2,11 @@
 
 | Document | Purpose |
 | --- | --- |
+| [FINAL_SUBMISSION_PLAN.md](FINAL_SUBMISSION_PLAN.md) | Final submission checklist, team video timing, and Pratyush's deployed-application shot list |
+| [design/README.md](design/README.md) | Final ER diagram, relational schema, and normalization evidence handoff |
+| [testing/README.md](testing/README.md) | Dated expected/actual test results and evidence handoff |
+| [Report handoff](../report/README.md) | Location and naming for the final technical report |
+| [Presentation handoff](../presentation/README.md) | Location and naming for the final slide deck |
 | [DA3_IMPLEMENTATION_PLAN.md](DA3_IMPLEMENTATION_PLAN.md) | D.A. 3 scope, stages, student responsibilities, and release checks |
 | [DA3_SETUP_RECORD.md](DA3_SETUP_RECORD.md) | Local Cassandra version, sample data, and verified query/persistence results |
 | [DA3_COMPARISON.md](DA3_COMPARISON.md) | Oracle/Cassandra comparison and synchronization limits |

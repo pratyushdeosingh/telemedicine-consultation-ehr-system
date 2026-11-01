@@ -316,12 +316,19 @@ telemedicine-ehr-da2/
 ├── database/         Oracle schema, SQL/PLSQL, upgrades, examples
 ├── deploy/           Private configuration helpers and deployment guides
 ├── docs/             Study/report material and verification evidence
+│   ├── design/       Final ER diagram, relational schema, normalization evidence
+│   ├── screenshots/  Application and database screenshots
+│   └── testing/      Dated expected/actual results and test output
 ├── frontend/         React application, styling, Vite configuration
+├── presentation/     Final presentation handoff
+├── report/           Final technical report handoff
 ├── package.json      Hosted API dependencies and Node version
 └── vercel.json       Build, routing, duration, cron configuration
 ```
 
 The directory name retains the D.A. 2 origin; the repository contains both the completed Oracle application and its D.A. 3 extension.
+
+For the final submission, use the [submission and video plan](docs/FINAL_SUBMISSION_PLAN.md). The [design](docs/design/README.md), [test evidence](docs/testing/README.md), [report](report/README.md), and [presentation](presentation/README.md) folders describe the remaining artifact handoffs; their presence does not mean those final artifacts have been added. Automated tests remain in `backend/tests/`. The existing `backend/` and `frontend/` folders contain the application source.
 
 ## Run locally
 

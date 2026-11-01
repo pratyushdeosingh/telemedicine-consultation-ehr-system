@@ -2,6 +2,10 @@
 
 `telemedicine_ehr.sql` contains the complete reproducible schema, constraints, indexes, sample records, sequences, invoice calculation function, patient-registration procedure, appointment-status procedure, allergy-conflict trigger, and virtual-session creation trigger.
 
+## Final submission script mapping
+
+The assignment's example `schema.sql` and `sample_data.sql` roles are provided by `telemedicine_ehr.sql` (schema plus base and expanded synthetic seeds). `academic_seed.sql` is the standalone extended-data script for an existing schema. `queries.sql` contains the SQL query demonstrations. Keep these existing filenames so the setup scripts and documentation continue to use the same paths. Cassandra schema and sample data are maintained separately in `../cassandra/`.
+
 The DA2 evidence scripts are:
 
 - `queries.sql`: 14 labelled SQL demonstrations covering selection, joins, outer joins, aggregation, subqueries, composite keys, `LISTAGG`, timestamps, a PL/SQL function, a set operation, safety auditing, and all 18 project tables.
