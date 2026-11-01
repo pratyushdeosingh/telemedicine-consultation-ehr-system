@@ -92,7 +92,7 @@ INSERT/UPDATE/DELETE/SELECT, joins, aggregates, subqueries, views and relevant t
 - Explain normalized Oracle relationships, separate repeated values, keys and constraints. Use the reviewed DA1 evidence rather than asserting 3NF without dependencies/decomposition.
 - Explain Cassandra's query-oriented patient/month partition and manual refresh; it is an extension to the relational system.
 - Show a current test-results summary and one invalid-operation example. State counts only after running and recording the checks.
-- For database-trigger proof, use the SQL trigger demonstration or verified integration evidence: the website also blocks known allergy conflicts before submission, so a UI warning alone does not prove the Oracle trigger executed.
+- For database-trigger proof, submit the conflicting prescription and show the server rejection, then verify no prescription header/items were stored. The website displays an advance warning but does not disable submission for an allergy conflict. The warning alone does not prove the Oracle trigger executed. See PRATYUSH_RECORDING_RUNBOOK.md for the source-checked steps.
 - Mention concrete limits: manual Cassandra synchronization; single-node local demonstration does not prove multi-node failover; billing status changes do not transfer money.
 
 ## OBS and integration checklist
