@@ -1,6 +1,8 @@
 # Care Continuum: Telemedicine Consultation and Electronic Health Records
 
-[Live application](https://telemedicine-consultation-ehr-syste.vercel.app/) · [Screenshots](screenshots/README.md) · [Tests and results](tests/README.md) · [Database design](docs/README.md)
+[Report](report/DBMS_Project_Report.pdf) · [Presentation](presentation/DBMS_Project_Presentation.pptx) · [Video demonstration](https://youtu.be/0iEwNM1nP-0) · [Live application](https://telemedicine-consultation-ehr-syste.vercel.app/)
+
+[Screenshots](screenshots/README.md) · [Tests and results](tests/README.md) · [Database design](docs/README.md)
 
 **Course:** BACSE202 - Database Management Systems · **Semester:** Fall 2026–2027
 
@@ -11,8 +13,6 @@
 | Pratyush Deo Singh | 25BCE5101 |
 | Dhuna Vijay Chavda | 25BCE1072 |
 | Sarbajeet Pattadar | 25BCE1920 |
-
-**YouTube demonstration:** _To be published — link will be added here._
 
 ## Problem statement
 
@@ -63,14 +63,12 @@ tests/                    Test instructions, expected/actual results and output
   evidence/               Read-only evidence collector
   results/2026-11-01/      Dated verification records
 docs/                     Architecture, ER diagram, relational schema, normalization
-report/                   Final technical report PDF location
-presentation/             Final presentation slide deck location
+report/                   Final technical report PDF
+presentation/             Final PowerPoint presentation
 deploy/                   Environment and deployment instructions
 package.json              Hosted API dependencies and Node version
 vercel.json               Production build and routing configuration
 ```
-
-Application source is separated into `backend/`, `frontend/` and `api/` rather than one `src/` directory. Automated test source remains in `backend/tests/`; submission test results are under `tests/`.
 
 ## Database design and sample data
 
@@ -124,7 +122,7 @@ npm run db:setup
 npm start
 ```
 
-Setup executes [database/telemedicine_ehr.sql](database/telemedicine_ehr.sql): schema and indexes, synthetic sample data, sequences, routines/triggers, then verification queries. The assignment's example `schema.sql` and `sample_data.sql` roles are combined in this executable file to preserve the tested seed/trigger creation order. [academic_seed.sql](database/academic_seed.sql) separately extends existing schemas. Follow [database/README.md](database/README.md) for upgrades and SQL execution.
+Setup executes [database/telemedicine_ehr.sql](database/telemedicine_ehr.sql): schema and indexes, synthetic sample data, sequences, routines/triggers, then verification queries. [academic_seed.sql](database/academic_seed.sql) separately extends existing schemas. Follow [database/README.md](database/README.md) for upgrades and SQL execution.
 
 ### 3. Frontend
 
@@ -182,11 +180,17 @@ From `backend/`, run `npm test` and `npm run db:verify-workflows`. From `fronten
 - Production uses one shared demonstration login, without individual user roles.
 - Cassandra refresh is an explicit import, with no cross-database transaction. Source deletions/date changes can leave older rows; the timeline is not an immutable audit log.
 - Local Cassandra has one node and replication factor one; multi-node failover/scaling is not demonstrated. Website refresh is limited to 2,000 events and uses an instance-local overlap guard.
-- Cleanup verification does not include a destructive fresh-schema rebuild of the configured databases.
 
 ## Submission artifacts
 
-The final report belongs at `report/DBMS_Project_Report.pdf`; the final slides belong at `presentation/DBMS_Project_Presentation.pptx`. These exports have not yet been supplied. The YouTube link will be added above after publication. The course submission Word document is separate and must contain the course/team details and working repository/video links.
+| Material | Link |
+| --- | --- |
+| Technical report | [PDF](report/DBMS_Project_Report.pdf) |
+| Presentation | [PowerPoint](presentation/DBMS_Project_Presentation.pptx) |
+| Recorded demonstration | [YouTube](https://youtu.be/0iEwNM1nP-0) |
+| Source repository | [GitHub](https://github.com/pratyushdeosingh/telemedicine-consultation-ehr-system) |
+
+The report and presentation are the supplied final exports. For implemented relationship cardinalities and billing behavior, see the [schema](docs/relational-schema.md) and [architecture](docs/architecture.md).
 
 ## Principal technical references
 
@@ -197,4 +201,4 @@ The final report belongs at `report/DBMS_Project_Report.pdf`; the final slides b
 5. DataStax, [Node.js driver documentation](https://docs.datastax.com/en/developer/nodejs-driver/4.8/).
 6. [React](https://react.dev/), [Express](https://expressjs.com/) and [Vite](https://vite.dev/) documentation.
 
-Dependency versions and lockfiles accompany the source. No base research paper is claimed; these are the principal technical references.
+Dependency versions and lockfiles accompany the source.

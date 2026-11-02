@@ -1,0 +1,21 @@
+Submission packaging verification - 2 November 2026 (Asia/Kolkata)
+
+PASS: supplied report and presentation copied byte-for-byte (SHA-256 comparisons).
+PASS: report opens with 36 pages; PowerPoint ZIP integrity passes with 11 slides.
+PASS: README links to report, presentation and supplied YouTube demonstration URL.
+PASS: all local Markdown file targets resolve.
+PASS: git diff --check.
+PASS: backend npm test - syntax checks and all 13 tests pass, no skips.
+PASS: frontend npm run lint - existing oxlint script passes.
+PASS: frontend npm run build - existing Vite production build passes.
+PASS: tracked filenames exclude environment secrets, wallets and connection bundles.
+
+Backend HTTP tests initially encountered sandbox localhost EACCES; rerun outside
+that restriction passed. Corepack could not download pnpm due registry DNS access;
+frontend checks used npm to invoke the installed scripts without dependency changes.
+
+Original report and slides are preserved. Report implementation discrepancies are
+explained in report/README.md. Historical database evidence remains dated 1 November.
+No fresh database setup, live database writes, deployment, commit or push was performed.
+YouTube URL was supplied by the author; playback could not be independently verified
+because the web fetch service could not retrieve YouTube or its oEmbed metadata.

@@ -2,6 +2,10 @@
 
 **Recorded:** 1 November 2026, Asia/Kolkata. Browser checks used the local React/Express application with its configured Oracle and Cassandra services. Backend unit/HTTP tests use controlled dependencies; they do not independently prove live database connectivity. All application data is synthetic.
 
+## Submission packaging verification
+
+[2 November 2026 verification](results/2026-11-02/submission-validation.txt): final artifact integrity, local links, backend tests and frontend lint/build. The database and browser evidence below remains the 1 November capture.
+
 ## Run the checks
 
 | Working directory | Command | Scope and data effects |

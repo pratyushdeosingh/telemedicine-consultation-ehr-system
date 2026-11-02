@@ -9,7 +9,7 @@
 | `da2_upgrade.sql` | Adds allergy metadata/rule to an existing compatible schema without recreating its records. |
 | `telemedicine_session_trigger.sql` | Installs the automatic virtual-session trigger on an existing schema. |
 
-The assignment's example schema/sample-data files are combined in `telemedicine_ehr.sql`. The creation order is significant: base/sample rows load before triggers are installed. Splitting/reordering those statements could generate unwanted duplicate session rows. The setup runner uses this existing file directly.
+Schema and sample data are combined in `telemedicine_ehr.sql`. The creation order is significant: base/sample rows load before triggers are installed. Splitting/reordering those statements could generate unwanted duplicate session rows. The setup runner uses this existing file directly.
 
 ## Fresh setup
 
